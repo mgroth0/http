@@ -1,5 +1,6 @@
 package matt.http.url
 
+import java.awt.Desktop
 import java.net.URI
 import java.net.URL
 import java.net.http.HttpClient
@@ -31,6 +32,8 @@ actual class MURL actual constructor(path: String): CommonURL {
     return response.body()
 
   }
+
+  fun open() = Desktop.getDesktop().browse(jURL.toURI())
 
 }
 
