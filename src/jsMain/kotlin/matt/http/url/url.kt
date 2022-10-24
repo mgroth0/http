@@ -1,7 +1,7 @@
 package matt.http.url
 
+import matt.http.HTTPType.GET
 import matt.http.req.HTTPRequester
-import matt.http.req.HTTPType.GET
 import org.w3c.dom.url.URL
 
 

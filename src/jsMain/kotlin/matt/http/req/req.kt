@@ -3,6 +3,7 @@ package matt.http.req
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import matt.file.FileOrURL
+import matt.http.HTTPType
 import matt.http.req.ReadyState.DONE
 import org.w3c.dom.events.Event
 import org.w3c.xhr.XMLHttpRequest
