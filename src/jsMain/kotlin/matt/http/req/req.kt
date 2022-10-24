@@ -23,7 +23,7 @@ class Failure(val status: Int, val message: String): ServerResponse {
   }
 }
 
-enum class HTTPType { GET, POST }
+
 
 fun XMLHttpRequest.setOnReadyStateChange(op: (Event)->Unit) {
   onreadystatechange = op

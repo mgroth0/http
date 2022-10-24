@@ -37,5 +37,7 @@ actual class MURL actual constructor(path: String): CommonURL {
 
   fun open() = Desktop.getDesktop().browse(jURL.toURI())
 
+  override operator fun plus(other: String): MURL = resolve(other)
+
 }
 
