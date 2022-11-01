@@ -9,6 +9,7 @@ import matt.lang.ILLEGAL
 import matt.lang.delegation.provider
 import matt.lang.delegation.varProp
 import matt.lang.go
+import matt.lang.not
 import matt.log.tab
 import matt.prim.byte.efficientlyTransferTo
 import java.io.IOException
@@ -24,6 +25,8 @@ object TheInternet {
   val wasAvailableInThisRuntime by lazy {
 	isAvailable()
   }
+  val wasNotAvailableInThisRuntime get() = not(wasAvailableInThisRuntime)
+  fun isNotAvailable() = not(isAvailable())
   fun isAvailable(): Boolean {
 	return try {
 	  val url = URL("http://www.google.com")
