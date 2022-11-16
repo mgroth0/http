@@ -154,7 +154,7 @@ class HTTPRequest internal constructor(private val url: MURL) {
 	  con.doOutput = true
 	  thread {
 		println("running async data transfer")
-		file.channel().efficientlyTransferTo(con.outputStream)
+		file.readChannel().efficientlyTransferTo(con.outputStream)
 		println("finished running async data transfer")
 	  }
 	}
