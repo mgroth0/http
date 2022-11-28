@@ -3,61 +3,37 @@
 package matt.http
 
 import matt.file.MFile
-import matt.file.commons.USER_HOME
+import matt.http.connection.ConnectionRefused
+import matt.http.connection.HTTPConnectResult
+import matt.http.connection.HTTPConnection
+import matt.http.connection.Timeout
+import matt.http.headers.HTTPHeaders
 import matt.http.url.MURL
 import matt.lang.ILLEGAL
-import matt.lang.delegation.provider
-import matt.lang.delegation.varProp
 import matt.lang.go
-import matt.lang.not
 import matt.log.tab
 import matt.prim.byte.efficientlyTransferTo
-import java.io.IOException
-import java.io.InputStream
+import java.net.ConnectException
 import java.net.HttpURLConnection
-import java.net.MalformedURLException
+import java.net.SocketTimeoutException
+import java.net.URI
 import java.net.URL
-import java.net.URLConnection
 import kotlin.concurrent.thread
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
-object TheInternet {
-  /*ugh, won't work with gradle daemon. There has to be a way to set properties that are reset for the gradle daemon*/
-  val wasAvailableInThisRuntime by lazy {
-	isAvailable()
-  }
-  val wasNotAvailableInThisRuntime get() = not(wasAvailableInThisRuntime)
-  fun isNotAvailable() = not(isAvailable())
-  fun isAvailable(): Boolean {
-	return try {
-	  val url = URL("http://www.google.com")
-	  val conn: URLConnection = url.openConnection()
-	  conn.connect()
-	  conn.getInputStream().close()
-	  true
-	} catch (e: MalformedURLException) {
-	  throw RuntimeException(e)
-	} catch (e: IOException) {
-	  false
-	}
-  }
-}
+@JvmName("http1")
+fun http(url: MURL, op: HTTPRequest.()->Unit = {}) = url.http(op)
 
+fun http(url: URI, op: HTTPRequest.()->Unit = {}) = MURL(url).http(op)
 
+fun http(url: URL, op: HTTPRequest.()->Unit = {}) = MURL(url).http(op)
 
-
-fun MURL.printHTTP(
-  op: HTTPRequest.()->Unit,
-) = httpString { op() }.go {
-  println(it)
-}
-
-fun MURL.httpString(
-  op: HTTPRequest.()->Unit,
-) = http { op() }.bufferedReader().readText()
+fun http(url: String, op: HTTPRequest.()->Unit = {}) = MURL(url).http(op)
 
 fun MURL.http(
   op: HTTPRequest.()->Unit = {},
-): InputStream {
+): HTTPConnectResult {
   val req = HTTPRequest(this)
   req.op()
   return req.connect()
@@ -67,15 +43,28 @@ fun MURL.http(
 annotation class HTTPDslMarker
 
 class HTTPRequest internal constructor(private val url: MURL) {
-  private val con = url.jURL.openConnection() as HttpURLConnection
+  init {
+	println("openning connection to ${url.jURL}")
+  }
+
+  private val jCon = url.jURL.openConnection() as HttpURLConnection
+  private val con = HTTPConnection(jCon)
   var method: HTTPType
-	get() = con.requestMethod.let { m -> HTTPType.values().first { it.name == m } }
+	get() = jCon.requestMethod.let { m -> HTTPType.values().first { it.name == m } }
 	set(value) {
-	  con.requestMethod = value.name
+	  jCon.requestMethod = value.name
+	}
+  var timeout: Duration?
+	get() = jCon.connectTimeout.takeIf { it != 0 }?.let {
+	  require(it > 0)
+	  it.milliseconds
+	}
+	set(value) {
+	  jCon.connectTimeout = value?.inWholeMilliseconds?.toInt() ?: 0
 	}
 
   fun headers(op: HTTPHeaders.()->Unit) {
-	HTTPHeaders(con).apply(op)
+	HTTPHeaders(jCon).apply(op)
   }
 
   var verbose = false
@@ -96,23 +85,32 @@ class HTTPRequest internal constructor(private val url: MURL) {
 	writer = AsyncWriter(file)
   }
 
-  internal fun connect(): InputStream {
+  internal fun connect(): HTTPConnectResult {
 	if (verbose) {
 	  println("sending ${method.name} to $url")
 	  println("request properties:")
-	  con.requestProperties.forEach {
+	  jCon.requestProperties.forEach {
 		tab("${it.key}:${it.value}")
 	  }
 	}
 	writer?.go {
 	  it.write()
 	}
-	con.connect()
-	if (verbose) {
-	  println("Response = ${con.responseCode}")
-	  println("Message = ${con.responseMessage}")
+	try {
+	  jCon.connect()
+	} catch (e: SocketTimeoutException) {
+	  println("Timeout!")
+	  return Timeout
+	} catch (e: ConnectException) {
+	  if (e.message?.trim() == "Connection refused") return ConnectionRefused
+	  else throw e
 	}
-	con.errorStream?.readAllBytes()?.let {
+
+	if (verbose) {
+	  println("Response = ${jCon.responseCode}")
+	  println("Message = ${jCon.responseMessage}")
+	}
+	jCon.errorStream?.readAllBytes()?.let {
 
 	  /*
 	  *
@@ -134,7 +132,7 @@ class HTTPRequest internal constructor(private val url: MURL) {
 	  }
 	}
 
-	return con.inputStream
+	return con
 
   }
 
@@ -144,51 +142,20 @@ class HTTPRequest internal constructor(private val url: MURL) {
 
   inner class BasicWriter(private val bytes: ByteArray): Writer() {
 	override fun write() {
-	  con.doOutput = true
-	  con.outputStream.write(bytes)
+	  jCon.doOutput = true
+	  jCon.outputStream.write(bytes)
 	}
   }
 
   inner class AsyncWriter(private val file: MFile): Writer() {
 	override fun write() {
-	  con.doOutput = true
+	  jCon.doOutput = true
 	  thread {
 		println("running async data transfer")
-		file.readChannel().efficientlyTransferTo(con.outputStream)
+		file.readChannel().efficientlyTransferTo(jCon.outputStream)
 		println("finished running async data transfer")
 	  }
 	}
   }
 }
-
-/*headers?*/
-@HTTPDslMarker
-class HTTPHeaders internal constructor(private val con: HttpURLConnection) {
-
-
-  var contentType: String by propProvider("Content-Type")
-  var accept: String by propProvider("Accept")
-  var auth: String by propProvider("Authorization")
-
-  private fun propProvider(key: String) = provider {
-	varProp(
-	  getter = {
-		con.getRequestProperty(key)
-	  },
-	  setter = {
-		con.setRequestProperty(key, it)
-	  }
-	)
-  }
-
-}
-
-
-object NetRC {
-  private val netrc = USER_HOME[".netrc"]
-  private val lines = netrc.readText().lines().map { it.trim() }
-  val login = lines.first { it.startsWith("login") }.substringAfter("login").trim()
-  val password = lines.first { it.startsWith("password") }.substringAfter("password").trim()
-}
-
 

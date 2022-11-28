@@ -10,6 +10,9 @@ import java.net.http.HttpResponse.BodyHandlers
 
 actual class MURL actual constructor(path: String): CommonURL {
 
+  constructor(uri: URI): this(uri.toString())
+  constructor(url: URL): this(url.toString())
+
   override val cpath = path
 
   val jURL: URL = URI(path).toURL()
