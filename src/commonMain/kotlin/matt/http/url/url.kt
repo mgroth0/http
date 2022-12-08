@@ -13,13 +13,18 @@ interface CommonURL: FileOrURL {
 }
 
 expect class MURL(path: String): CommonURL {
+
+
   val protocol: String
 
   override fun resolve(other: String): MURL
 
-  final override fun toString(): String
+  override fun toString(): String
 
   fun loadText(): String
+}
+val EXAMPLE_MURL by lazy {
+  MURL("https://example.com/")
 }
 
 fun String.isValidHttpUrl(): Boolean {
