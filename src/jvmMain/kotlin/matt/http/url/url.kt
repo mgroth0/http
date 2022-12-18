@@ -21,6 +21,7 @@ actual class MURL actual constructor(path: String): CommonURL {
 
   actual val protocol: String = jURL.protocol
 
+  operator fun get(other: String) = resolve(other)
   actual override fun resolve(other: String): MURL {
     /*the java way is weird and discards a segment*/
     return MURL(cpath.removeSuffix("/") + "/" + other.removePrefix("/"))
