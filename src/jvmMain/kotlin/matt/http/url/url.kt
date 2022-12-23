@@ -1,5 +1,6 @@
 package matt.http.url
 
+import matt.file.URLLike
 import java.awt.Desktop
 import java.net.URI
 import java.net.URL
@@ -7,10 +8,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse.BodyHandlers
 
-interface URLLike {
-  fun toJavaURL(): URL
-  fun toJavaURI(): URI
-}
+
 
 actual class MURL actual constructor(path: String): CommonURL, URLLike {
 
