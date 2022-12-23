@@ -7,8 +7,12 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse.BodyHandlers
 
+interface URLLike {
+  fun toJavaURL(): URL
+  fun toJavaURI(): URI
+}
 
-actual class MURL actual constructor(path: String): CommonURL {
+actual class MURL actual constructor(path: String): CommonURL, URLLike {
 
 
 
@@ -17,7 +21,11 @@ actual class MURL actual constructor(path: String): CommonURL {
 
   override val cpath = path
 
-  val jURL: URL = URI(path).toURL()
+  override fun toJavaURI(): URI {
+    return URI(cpath)
+  }
+
+  val jURL: URL = toJavaURI().toURL()
 
   actual val protocol: String = jURL.protocol
 
@@ -27,6 +35,8 @@ actual class MURL actual constructor(path: String): CommonURL {
     return MURL(cpath.removeSuffix("/") + "/" + other.removePrefix("/"))
 	/*return MURL(jURL.toURI().resolve(other).toString())*/
   }
+
+  override fun toJavaURL() = jURL
 
   actual override fun toString() = cpath
 
