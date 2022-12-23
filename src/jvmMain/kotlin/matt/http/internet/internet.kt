@@ -6,7 +6,7 @@ import java.net.MalformedURLException
 import java.net.URL
 import java.net.URLConnection
 
-object TheInternet {
+class TheInternet {
   /*ugh, won't work with gradle daemon. There has to be a way to set properties that are reset for the gradle daemon*/
   val wasAvailableInThisRuntime by lazy {
 	isAvailable()
