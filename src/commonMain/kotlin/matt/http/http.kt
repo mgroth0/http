@@ -2,4 +2,5 @@ package matt.http
 
 
 
-enum class HTTPType { GET, POST, PUT }
+@DslMarker
+annotation class HTTPDslMarker
