@@ -1,13 +1,13 @@
 package matt.http.headers
 
 import matt.http.HTTPDslMarker
-import matt.http.connection.HTTPConnection
+import matt.http.req.HTTPRequest
 import matt.lang.delegation.provider
 import matt.lang.delegation.varProp
 
 
 @HTTPDslMarker
-class HTTPHeaders internal constructor(private val con: HTTPConnection) {
+class HTTPHeaders internal constructor(private val con: HTTPRequest) {
 
 
   var contentType: String? by propProvider("Content-Type")

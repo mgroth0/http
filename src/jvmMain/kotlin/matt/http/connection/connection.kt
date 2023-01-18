@@ -1,3 +1,5 @@
+@file:JvmName("ConnectionJvmKt")
+
 package matt.http.connection
 
 import java.io.InputStream
@@ -22,17 +24,7 @@ class JHTTPConnection internal constructor(private val jCon: HttpURLConnection):
 	inputStream.bufferedReader().readText()
   }
 
-  override fun print() {
-	println(text)
-  }
 
-  override fun getRequestProperty(name: String): String? {
-	return jCon.getRequestProperty(name)
-  }
-
-  override fun setRequestProperty(name: String, value: String?) {
-	jCon.setRequestProperty(name, value)
-  }
 }
 
 val HTTPConnection.inputStream get() = (this as JHTTPConnection).inputStream

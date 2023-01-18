@@ -11,6 +11,7 @@ import matt.http.url.MURL
 import matt.lang.ILLEGAL
 import matt.lang.go
 import matt.log.tab
+import matt.log.warn.warn
 import matt.prim.byte.efficientlyTransferTo
 import java.net.ConnectException
 import java.net.HttpURLConnection
@@ -22,16 +23,27 @@ import kotlin.time.Duration.Companion.milliseconds
 class JHTTPRequest internal constructor(private val url: MURL): HTTPRequest {
   init {
 	println("opening connection to ${url.jURL}")
+	warn("it is weird and does not match javascript that ths happens automatically")
   }
 
   private val jCon = url.jURL.openConnection() as HttpURLConnection
   private val con = JHTTPConnection(jCon)
-  var method: HTTPMethod
+
+
+  override fun getRequestProperty(name: String): String? {
+	return jCon.getRequestProperty(name)
+  }
+
+  override fun setRequestProperty(name: String, value: String?) {
+	jCon.setRequestProperty(name, value)
+  }
+
+  override var method: HTTPMethod
 	get() = jCon.requestMethod.let { m -> HTTPMethod.values().first { it.name == m } }
 	set(value) {
 	  jCon.requestMethod = value.name
 	}
-  var timeout: Duration?
+  override var timeout: Duration?
 	get() = jCon.connectTimeout.takeIf { it != 0 }?.let {
 	  require(it > 0)
 	  it.milliseconds
@@ -41,7 +53,7 @@ class JHTTPRequest internal constructor(private val url: MURL): HTTPRequest {
 	}
 
   fun headers(op: HTTPHeaders.()->Unit) {
-	HTTPHeaders(con).apply(op)
+	HTTPHeaders(this).apply(op)
   }
 
   var verbose = false
