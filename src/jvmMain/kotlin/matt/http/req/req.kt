@@ -1,18 +1,20 @@
 package matt.http.req
 
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import matt.file.MFile
 import matt.http.connection.ConnectionRefused
+import matt.http.connection.HTTPAsyncConnection
 import matt.http.connection.HTTPConnectResult
+import matt.http.connection.JHTTPAsyncConnection
 import matt.http.connection.JHTTPConnection
 import matt.http.connection.Timeout
-import matt.http.headers.HTTPHeaders
 import matt.http.method.HTTPMethod
+import matt.http.req.write.AsyncWriter
+import matt.http.req.write.BasicHTTPWriter
+import matt.http.req.write.HTTPWriter
 import matt.http.url.MURL
-import matt.lang.ILLEGAL
 import matt.lang.go
-import matt.log.tab
-import matt.log.warn.warn
-import matt.prim.byte.efficientlyTransferTo
 import java.net.ConnectException
 import java.net.HttpURLConnection
 import java.net.SocketTimeoutException
@@ -20,25 +22,38 @@ import kotlin.concurrent.thread
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-actual class HTTPRequest internal actual constructor(private val url: MURL) {
+actual class HTTPRequestImpl internal actual constructor(override val url: MURL): HTTPRequest() {
+
   init {
-	println("opening connection to ${url.jURL}")
-	warn("it is weird and does not match javascript that ths happens automatically")
+	println("configuring connection for ${url.jURL}")
   }
 
   private val jCon = url.jURL.openConnection() as HttpURLConnection
   private val con = JHTTPConnection(jCon)
 
+  fun writeBytesNow(bytes: ByteArray) {
+//	jCon.doOutput = true
+	jCon.outputStream.write(bytes)
+  }
 
-  actual fun getRequestProperty(name: String): String? {
+  fun writeStringNow(string: String) = writeBytesNow(string.encodeToByteArray())
+  inline fun <reified T> writeAsJsonNow(someData: T) {
+	writeStringNow(Json.encodeToString(someData))
+  }
+
+
+  override fun getRequestProperty(name: String): String? {
 	return jCon.getRequestProperty(name)
   }
 
-  actual fun setRequestProperty(name: String, value: String?) {
+  actual override fun setRequestProperty(name: String, value: String?) {
 	jCon.setRequestProperty(name, value)
   }
 
-  actual var method: HTTPMethod
+  actual override fun allRequestHeaders() = jCon.requestProperties
+
+
+  actual override var method: HTTPMethod
 	get() = jCon.requestMethod.let { m -> HTTPMethod.values().first { it.name == m } }
 	set(value) {
 	  jCon.requestMethod = value.name
@@ -52,41 +67,56 @@ actual class HTTPRequest internal actual constructor(private val url: MURL) {
 	  jCon.connectTimeout = value?.inWholeMilliseconds?.toInt() ?: 0
 	}
 
-  fun headers(op: HTTPHeaders.()->Unit) {
-	HTTPHeaders(this).apply(op)
-  }
 
-  var verbose = false
-
-  var writer: Writer? = null
+  var writer: HTTPWriter? = null
 	set(value) {
 	  require(field == null)
+	  if (value != null) jCon.doOutput = true
 	  field = value
 	}
 
-  var data: ByteArray
-	get() = ILLEGAL
-	set(value) {
-	  writer = BasicWriter(value)
-	}
-
   fun writeAsync(file: MFile) {
-	writer = AsyncWriter(file)
+	//	jCon.doOutput = true
+	writer = AsyncWriter(this, file)
   }
 
-  actual internal fun connect(): HTTPConnectResult {
-	if (verbose) {
-	  println("sending ${method.name} to $url")
-	  println("request properties:")
-	  jCon.requestProperties.forEach {
-		tab("${it.key}:${it.value}")
-	  }
-	}
-	writer?.go {
-	  it.write()
-	}
-	try {
+  internal val outputStream get() = jCon.outputStream
+
+
+  override fun configureForWritingBytes(bytes: ByteArray) {
+	//	jCon.doOutput = true
+	writer = BasicHTTPWriter(this, bytes)
+  }
+
+
+  actual override fun openConnection(): HTTPConnectResult {
+	return try {
 	  jCon.connect()
+	  writer?.go {
+		it.write()
+	  }
+	  jCon.errorStream?.readAllBytes()?.let {
+
+		/*
+		*
+		*   * <p>This method will not cause a connection to be initiated.  If
+		* the connection was not connected, or if the server did not have
+		* an error while connecting or if the server had an error but
+		* no error data was sent, this method will return null. This is
+		* the default.
+		*
+		* @return an error stream if any, null if there have been no
+		* errors, the connection is not connected or the server sent no
+		* useful data.
+		* */
+
+		println("ERR: ${it.decodeToString()}")
+	  } ?: run {
+		if (verbose) {
+		  println("no error message from server")
+		}
+	  }
+	  con
 	} catch (e: SocketTimeoutException) {
 	  println("Timeout!")
 	  return Timeout
@@ -94,57 +124,19 @@ actual class HTTPRequest internal actual constructor(private val url: MURL) {
 	  if (e.message?.trim() == "Connection refused") return ConnectionRefused
 	  else throw e
 	}
-
-	if (verbose) {
-	  println("Response = ${jCon.responseCode}")
-	  println("Message = ${jCon.responseMessage}")
-	}
-	jCon.errorStream?.readAllBytes()?.let {
-
-	  /*
-	  *
-	  *   * <p>This method will not cause a connection to be initiated.  If
-	  * the connection was not connected, or if the server did not have
-	  * an error while connecting or if the server had an error but
-	  * no error data was sent, this method will return null. This is
-	  * the default.
-	  *
-	  * @return an error stream if any, null if there have been no
-	  * errors, the connection is not connected or the server sent no
-	  * useful data.
-	  * */
-
-	  println("ERR: ${it.decodeToString()}")
-	} ?: run {
-	  if (verbose) {
-		println("no error message from server")
-	  }
-	}
-
-	return con
-
   }
 
-  abstract inner class Writer {
-	internal abstract fun write()
-  }
-
-  inner class BasicWriter(private val bytes: ByteArray): Writer() {
-	override fun write() {
-	  jCon.doOutput = true
-	  jCon.outputStream.write(bytes)
+  override fun openAsyncConnection(): HTTPAsyncConnection {
+	var r: HTTPConnectResult? = null
+	val t = thread {
+	  r = openConnection()
+	}
+	return JHTTPAsyncConnection {
+	  t.join()
+	  r!!
 	}
   }
 
-  inner class AsyncWriter(private val file: MFile): Writer() {
-	override fun write() {
-	  jCon.doOutput = true
-	  thread {
-		println("running async data transfer")
-		file.readChannel().efficientlyTransferTo(jCon.outputStream)
-		println("finished running async data transfer")
-	  }
-	}
-  }
 }
+
 
