@@ -20,7 +20,7 @@ import kotlin.concurrent.thread
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-class JHTTPRequest internal constructor(private val url: MURL): HTTPRequest {
+actual class HTTPRequest internal actual constructor(private val url: MURL) {
   init {
 	println("opening connection to ${url.jURL}")
 	warn("it is weird and does not match javascript that ths happens automatically")
@@ -30,20 +30,20 @@ class JHTTPRequest internal constructor(private val url: MURL): HTTPRequest {
   private val con = JHTTPConnection(jCon)
 
 
-  override fun getRequestProperty(name: String): String? {
+  actual fun getRequestProperty(name: String): String? {
 	return jCon.getRequestProperty(name)
   }
 
-  override fun setRequestProperty(name: String, value: String?) {
+  actual fun setRequestProperty(name: String, value: String?) {
 	jCon.setRequestProperty(name, value)
   }
 
-  override var method: HTTPMethod
+  actual var method: HTTPMethod
 	get() = jCon.requestMethod.let { m -> HTTPMethod.values().first { it.name == m } }
 	set(value) {
 	  jCon.requestMethod = value.name
 	}
-  override var timeout: Duration?
+  actual var timeout: Duration?
 	get() = jCon.connectTimeout.takeIf { it != 0 }?.let {
 	  require(it > 0)
 	  it.milliseconds
@@ -74,7 +74,7 @@ class JHTTPRequest internal constructor(private val url: MURL): HTTPRequest {
 	writer = AsyncWriter(file)
   }
 
-  internal fun connect(): HTTPConnectResult {
+  actual internal fun connect(): HTTPConnectResult {
 	if (verbose) {
 	  println("sending ${method.name} to $url")
 	  println("request properties:")

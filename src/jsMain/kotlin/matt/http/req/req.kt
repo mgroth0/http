@@ -23,6 +23,7 @@ fun XMLHttpRequest.setOnReadyStateChange(op: (Event)->Unit) {
 }
 
 
+@Deprecated("switch to stuff in common")
 class HTTPRequester<T>(
   private val type: HTTPMethod,
   private val url: FileOrURL,
@@ -82,11 +83,13 @@ class HTTPRequester<T>(
 }
 
 @SeeURL("https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest")
-class JSHTTPRequest(
-  private val xmlHttpRequest: XMLHttpRequest,
+actual class HTTPRequest actual constructor(
   private val url: MURL
-): HTTPRequest {
-  override var timeout: Duration?
+) {
+
+  private val xmlHttpRequest: XMLHttpRequest = XMLHttpRequest()
+
+  actual var timeout: Duration?
 	/*should be unsigned long, not int...*/
 	get() = xmlHttpRequest.timeout.takeIf { it > 0 }?.milliseconds
 	set(value) {
@@ -96,20 +99,20 @@ class JSHTTPRequest(
 		xmlHttpRequest.timeout = value.inWholeMilliseconds.toInt()
 	  }
 	}
-  override var method: HTTPMethod = GET
+  actual var method: HTTPMethod = GET
 
 
-  override fun getRequestProperty(name: String): String? {
+  actual fun getRequestProperty(name: String): String? {
 	return xmlHttpRequest.getResponseHeader(name)
   }
 
   @SeeURL("https://stackoverflow.com/questions/2464192/how-to-remove-http-specific-headers-in-javascript")
-  override fun setRequestProperty(name: String, value: String?) {
+  actual fun setRequestProperty(name: String, value: String?) {
 	xmlHttpRequest.setRequestHeader(name, value ?: "")
   }
 
 
-  fun connect(): HTTPConnectResult {
+  actual fun connect(): HTTPConnectResult {
 	xmlHttpRequest.open(method.name, url.toString(), async = false)
 	return JSHTTPConnection(xmlHttpRequest)
   }

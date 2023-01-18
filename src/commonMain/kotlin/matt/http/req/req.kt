@@ -1,10 +1,13 @@
 package matt.http.req
 
+import matt.http.connection.HTTPConnectResult
 import matt.http.method.HTTPMethod
+import matt.http.url.MURL
 import kotlin.time.Duration
 
-interface HTTPRequest {
+expect class HTTPRequest internal constructor(url: MURL) {
   var timeout: Duration?
+
   /*method = PUT
   writeAsync(tarFile)
   verbose = true*/
@@ -12,4 +15,6 @@ interface HTTPRequest {
 
   fun getRequestProperty(name: String): String?
   fun setRequestProperty(name: String, value: String?)
+
+  internal fun connect(): HTTPConnectResult
 }
