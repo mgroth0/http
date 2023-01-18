@@ -21,7 +21,7 @@ class JHTTPConnection internal constructor(private val jCon: HttpURLConnection):
 	inputStream.bufferedReader().readText()
   }
 
-  fun print() {
+  override fun print() {
 	println(text)
   }
 
