@@ -34,3 +34,5 @@ class JHTTPConnection internal constructor(private val jCon: HttpURLConnection):
 	jCon.setRequestProperty(name, value)
   }
 }
+
+val HTTPConnection.inputStream get() = (this as JHTTPConnection).inputStream
