@@ -72,8 +72,11 @@ class HTTPRequester<T>(
 	req.setRequestHeader("Content-Type", "application/json;charset=UTF-8")
 	req.send(Json.encodeToString(sendData))
   }
+}
 
+class JSHTTPRequest(xmlHttpRequest: XMLHttpRequest): HTTPRequest {
 
 }
+
 
 
