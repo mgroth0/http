@@ -1,3 +1,5 @@
+@file:JvmName("InternetJvmKt")
+
 package matt.http.internet
 
 import java.io.IOException
