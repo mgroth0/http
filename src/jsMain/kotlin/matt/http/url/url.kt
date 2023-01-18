@@ -1,7 +1,6 @@
 package matt.http.url
 
-import matt.http.method.HTTPMethod.GET
-import matt.http.req.HTTPRequester
+import matt.http.http
 import org.w3c.dom.url.URL
 
 
@@ -19,7 +18,8 @@ actual class MURL actual constructor(path: String): CommonURL {
 
   actual override fun toString() = cpath
 
-  private val requester by lazy { HTTPRequester(type = GET, this) { responseText } }
+  /*private val requester by lazy { HTTPRequester(type = GET, this) { responseText } }*/
 
-  actual fun loadText() = requester.send()
+  actual fun loadText() = http().requireSuccessful().text
+    /*requester.send()*/
 }
