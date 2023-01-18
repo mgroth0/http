@@ -1,6 +1,6 @@
 package matt.http.url
 
-import matt.http.HTTPMethod.GET
+import matt.http.method.HTTPMethod.GET
 import matt.http.req.HTTPRequester
 import org.w3c.dom.url.URL
 
