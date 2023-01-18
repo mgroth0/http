@@ -4,7 +4,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import matt.file.FileOrURL
 import matt.http.method.HTTPMethod
-import matt.http.resp.HTTPResponse
+import matt.http.resp.HTTPData
 import matt.http.resp.ReadyState
 import matt.http.resp.ReadyState.DONE
 import org.w3c.dom.events.Event
@@ -79,20 +79,3 @@ class HTTPRequester<T>(
 }
 
 
-
-open class HTTPHeaders(
-  readyState: ReadyState,
-  val statusCode: Int,
-  val statusText: String,
-): HTTPResponse(readyState = readyState)
-
-class HTTPData(
-  readyState: ReadyState,
-  statusCode: Int,
-  statusText: String,
-  val responseText: String
-): HTTPHeaders(readyState = readyState, statusCode = statusCode, statusText = statusText) {
-  init {
-	require(readyState == DONE)
-  }
-}

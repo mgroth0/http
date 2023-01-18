@@ -1,6 +1,16 @@
 package matt.http.connection
 
-interface HTTPConnection {
+
+sealed interface HTTPConnectResult {
+  fun requireSuccessful() = this as HTTPConnection
+}
+
+sealed interface HTTPConnectFailure: HTTPConnectResult
+
+object Timeout: HTTPConnectFailure
+object ConnectionRefused: HTTPConnectFailure
+
+interface HTTPConnection: HTTPConnectResult {
   fun getRequestProperty(name: String): String?
   fun setRequestProperty(name: String, value: String?)
 }

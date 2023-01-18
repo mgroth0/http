@@ -5,16 +5,8 @@ import java.net.HttpURLConnection
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-sealed interface HTTPConnectResult {
-  fun requireSuccessful() = this as JHTTPConnection
-}
 
-sealed interface HTTPConnectFailure: HTTPConnectResult
-
-object Timeout: HTTPConnectFailure
-object ConnectionRefused: HTTPConnectFailure
-
-class JHTTPConnection internal constructor(private val jCon: HttpURLConnection): HTTPConnectResult, HTTPConnection {
+class JHTTPConnection internal constructor(private val jCon: HttpURLConnection): HTTPConnection {
   val inputStream: InputStream by jCon::inputStream
   val statusCode get() = jCon.responseCode
   var timeout: Duration?

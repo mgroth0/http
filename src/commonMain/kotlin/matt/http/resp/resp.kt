@@ -1,5 +1,7 @@
 package matt.http.resp
 
+import matt.http.resp.ReadyState.DONE
+
 
 enum class ReadyState {
   UNSENT, OPENED, HEADERS_RECEIVED, LOADING, DONE
@@ -23,5 +25,25 @@ object SimpleSuccess: SuccessText(null) {
 class Failure(val status: Int, val message: String): ServerResponse {
   override fun toString(): String {
 	return "$status: $message"
+  }
+}
+
+open class HTTPHeaders(
+  readyState: ReadyState,
+  val statusCode: Int,
+  val statusText: String,
+): HTTPResponse(readyState = readyState)
+
+
+
+
+class HTTPData(
+  readyState: ReadyState,
+  statusCode: Int,
+  statusText: String,
+  val responseText: String
+): HTTPHeaders(readyState = readyState, statusCode = statusCode, statusText = statusText) {
+  init {
+    require(readyState == DONE)
   }
 }
