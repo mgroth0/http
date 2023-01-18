@@ -9,7 +9,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 class JHTTPConnection internal constructor(private val jCon: HttpURLConnection): HTTPConnection {
   val inputStream: InputStream by jCon::inputStream
-  val statusCode get() = jCon.responseCode
+  override val statusCode get() = jCon.responseCode
   var timeout: Duration?
 	get() = jCon.readTimeout.takeIf { it != 0 }?.let {
 	  require(it > 0)
