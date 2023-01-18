@@ -1,12 +1,10 @@
 package matt.http.headers
 
 import matt.http.HTTPDslMarker
-import matt.http.connection.HTTPConnection
 import matt.lang.delegation.provider
 import matt.lang.delegation.varProp
 import java.net.HttpURLConnection
 
-/*headers?*/
 @HTTPDslMarker
 class HTTPHeaders internal constructor(private val con: HttpURLConnection) {
 
@@ -25,5 +23,4 @@ class HTTPHeaders internal constructor(private val con: HttpURLConnection) {
 	  }
 	)
   }
-
 }
