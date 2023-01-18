@@ -14,4 +14,5 @@ interface HTTPConnection: HTTPConnectResult {
   fun getRequestProperty(name: String): String?
   fun setRequestProperty(name: String, value: String?)
   fun print()
+  val text: String
 }

@@ -17,7 +17,7 @@ class JHTTPConnection internal constructor(private val jCon: HttpURLConnection):
 	set(value) {
 	  jCon.readTimeout = value?.inWholeMilliseconds?.toInt() ?: 0
 	}
-  val text by lazy {
+  override val text by lazy {
 	inputStream.bufferedReader().readText()
   }
 
