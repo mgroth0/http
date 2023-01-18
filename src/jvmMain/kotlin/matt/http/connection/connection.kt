@@ -6,6 +6,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 
+
 class JHTTPConnection internal constructor(private val jCon: HttpURLConnection): HTTPConnection {
   val inputStream: InputStream by jCon::inputStream
   val statusCode get() = jCon.responseCode
