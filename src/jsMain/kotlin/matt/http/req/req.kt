@@ -1,5 +1,6 @@
 package matt.http.req
 
+import matt.file.FileOrURL
 import matt.http.connection.HTTPAsyncConnection
 import matt.http.connection.HTTPConnectResult
 import matt.http.connection.JSHTTPAsyncConnection
@@ -9,7 +10,6 @@ import matt.http.connection.ReadyState.DONE
 import matt.http.connection.setOnReadyStateChange
 import matt.http.method.HTTPMethod
 import matt.http.method.HTTPMethod.GET
-import matt.http.url.MURL
 import matt.lang.anno.SeeURL
 import matt.lang.go
 import matt.prim.str.joinWithCommas
@@ -80,7 +80,7 @@ import kotlin.time.Duration
 
 @SeeURL("https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest")
 actual class HTTPRequestImpl actual constructor(
-  override val url: MURL
+  override val url: FileOrURL
 ): HTTPRequest() {
 
   private val xmlHttpRequest: XMLHttpRequest by lazy {
@@ -159,7 +159,7 @@ actual class HTTPRequestImpl actual constructor(
 	require(timeout == null) {
 	  "According to UDN web docs: \"Timeout shouldn't be used for synchronous XMLHttpRequests requests used in a document environment or it will throw an InvalidAccessError exception\""
 	}
-	xmlHttpRequest.open(method.name, url.toString(), async = async)
+	xmlHttpRequest.open(method.name, url.cpath, async = async)
 	requestHeaders.entries.forEach {
 	  xmlHttpRequest.setRequestHeader(it.key, it.value.joinWithCommas())
 	}

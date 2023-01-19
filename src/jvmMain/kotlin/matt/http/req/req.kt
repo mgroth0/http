@@ -2,6 +2,7 @@ package matt.http.req
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import matt.file.FileOrURL
 import matt.file.MFile
 import matt.http.connection.ConnectionRefused
 import matt.http.connection.HTTPAsyncConnection
@@ -13,26 +14,27 @@ import matt.http.method.HTTPMethod
 import matt.http.req.write.AsyncWriter
 import matt.http.req.write.BasicHTTPWriter
 import matt.http.req.write.HTTPWriter
-import matt.http.url.MURL
 import matt.lang.go
 import java.net.ConnectException
 import java.net.HttpURLConnection
 import java.net.SocketTimeoutException
+import java.net.URI
 import kotlin.concurrent.thread
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-actual class HTTPRequestImpl internal actual constructor(override val url: MURL): HTTPRequest() {
+actual class HTTPRequestImpl internal actual constructor(override val url: FileOrURL): HTTPRequest() {
 
-  init {
-	println("configuring connection for ${url.jURL}")
-  }
+//  init {
+//	println("configuring connection for ${url.cpath}")
+//	Thread.dumpStack()
+//  }
 
-  private val jCon = url.jURL.openConnection() as HttpURLConnection
+  private val jCon = URI(url.cpath).toURL().openConnection() as HttpURLConnection
   private val con = JHTTPConnection(jCon)
 
   fun writeBytesNow(bytes: ByteArray) {
-//	jCon.doOutput = true
+	//	jCon.doOutput = true
 	jCon.outputStream.write(bytes)
   }
 
@@ -47,6 +49,7 @@ actual class HTTPRequestImpl internal actual constructor(override val url: MURL)
   }
 
   actual override fun setRequestProperty(name: String, value: String?) {
+	println("setting request property $name to $value")
 	jCon.setRequestProperty(name, value)
   }
 

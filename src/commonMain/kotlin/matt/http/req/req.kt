@@ -2,12 +2,12 @@ package matt.http.req
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import matt.file.FileOrURL
 import matt.http.connection.HTTPAsyncConnection
 import matt.http.connection.HTTPConnectResult
 import matt.http.connection.HTTPResponse
 import matt.http.headers.HTTPHeaders
 import matt.http.method.HTTPMethod
-import matt.http.url.MURL
 import matt.lang.ILLEGAL
 import matt.lang.anno.SeeURL
 import matt.log.tab
@@ -15,7 +15,7 @@ import kotlin.time.Duration
 
 @SeeURL("https://youtrack.jetbrains.com/issue/KT-20427") abstract class HTTPRequest {
 
-  abstract protected val url: MURL
+  abstract protected val url: FileOrURL
 
 
   var verbose = false
@@ -80,7 +80,7 @@ import kotlin.time.Duration
 
 }
 
-expect class HTTPRequestImpl internal constructor(url: MURL): HTTPRequest {
+expect class HTTPRequestImpl internal constructor(url: FileOrURL): HTTPRequest {
   var timeout: Duration?
 
   /*method = PUT

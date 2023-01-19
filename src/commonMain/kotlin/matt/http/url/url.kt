@@ -3,7 +3,10 @@ package matt.http.url
 import matt.file.FileOrURL
 import matt.file.construct.mFile
 
-
+fun buildQueryURL(mainURL: String, vararg params: Pair<String, String>) = buildQueryURL(mainURL, params.toMap())
+fun buildQueryURL(mainURL: String, params: Map<String, String>): String {
+  return "$mainURL?${params.entries.joinToString(separator = "&") { "${it.key}=${it.value}" }}"
+}
 
 interface CommonURL: FileOrURL {
 
@@ -25,6 +28,7 @@ expect class MURL(path: String): CommonURL {
 
   fun loadText(): String
 }
+
 val EXAMPLE_MURL by lazy {
   MURL("https://example.com/")
 }
@@ -42,5 +46,7 @@ fun String.isValidHttpUrl(): Boolean {
 fun fileOrURL(s: String): FileOrURL {
   return if (s.isValidHttpUrl()) MURL(s) else mFile(s)
 }
+
+
 
 

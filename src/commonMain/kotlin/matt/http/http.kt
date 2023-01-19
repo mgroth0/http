@@ -1,5 +1,6 @@
 package matt.http
 
+import matt.file.FileOrURL
 import matt.http.connection.HTTPAsyncConnection
 import matt.http.connection.HTTPConnectResult
 import matt.http.req.HTTPRequestImpl
@@ -12,13 +13,16 @@ annotation class HTTPDslMarker
 
 
 @JvmName("http1")
-fun http(url: MURL, op: HTTPRequestImpl.()->Unit = {}) = url.http(op)
-
+fun http(url: FileOrURL, op: HTTPRequestImpl.()->Unit = {}) = url.http(op)
 fun http(url: String, op: HTTPRequestImpl.()->Unit = {}) = MURL(url).http(op)
 
+@JvmName("httpAsync1")
+fun httpAsync(url: FileOrURL, op: HTTPRequestImpl.()->Unit = {}) = url.httpAsync(op)
+fun httpAsync(url: String, op: HTTPRequestImpl.()->Unit = {}) = MURL(url).httpAsync(op)
 
 
-fun MURL.http(
+
+fun FileOrURL.http(
   op: HTTPRequestImpl.()->Unit = {},
 ): HTTPConnectResult {
   val req = HTTPRequestImpl(this)
@@ -27,7 +31,7 @@ fun MURL.http(
 }
 
 
-fun MURL.httpAsync(
+fun FileOrURL.httpAsync(
   op: HTTPRequestImpl.()->Unit = {},
 ): HTTPAsyncConnection {
   val req = HTTPRequestImpl(this)

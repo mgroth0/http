@@ -8,7 +8,7 @@ actual class MURL actual constructor(path: String): CommonURL {
 
   override val cpath = path
 
-  private val jsURL = URL(path)
+  private val jsURL by lazy { URL(path) }
 
   actual val protocol: String get() = jsURL.protocol
 
