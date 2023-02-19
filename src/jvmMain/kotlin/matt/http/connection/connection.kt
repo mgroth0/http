@@ -10,7 +10,6 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 
-
 class JHTTPConnection internal constructor(private val jCon: HttpURLConnection): HTTPResponse {
   val inputStream: InputStream by jCon::inputStream
   override val statusCode get() = jCon.responseCode
@@ -29,12 +28,16 @@ class JHTTPConnection internal constructor(private val jCon: HttpURLConnection):
   override val statusMessage: String
 	get() = jCon.responseMessage
 
+  override fun toString(): String {
+	return "JHTTPConnection[status=${statusCode},message=${statusMessage}]"
+  }
+
 }
 
 val HTTPResponse.inputStream get() = (this as JHTTPConnection).inputStream
 
 
-class JHTTPAsyncConnection(private val resultGetter: () -> HTTPConnectResult): HTTPAsyncConnection {
+class JHTTPAsyncConnection(private val resultGetter: ()->HTTPConnectResult): HTTPAsyncConnection {
 
   override fun whenDone(op: Consume<HTTPConnectResult>) {
 	/*obviously this can be done way more efficiently*/
