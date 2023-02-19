@@ -50,7 +50,8 @@ class HTTPHeaders internal constructor(private val con: HTTPRequest) {
 
 
 enum class HTTPContentType(val string: String? = null) {
-  applicationJson("application/json");
+  applicationJson("application/json"),
+  applicationJsonCharsetUTF8("application/json;charset=UTF-8");
 
   fun asString() = string ?: name
 }

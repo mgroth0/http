@@ -6,6 +6,7 @@ import matt.file.FileOrURL
 import matt.http.connection.HTTPAsyncConnection
 import matt.http.connection.HTTPConnectResult
 import matt.http.connection.HTTPResponse
+import matt.http.headers.HTTPContentType.applicationJsonCharsetUTF8
 import matt.http.headers.HTTPHeaders
 import matt.http.method.HTTPMethod
 import matt.lang.ILLEGAL
@@ -71,7 +72,7 @@ import kotlin.time.Duration
 
   inline fun <reified T> configureForWritingJson(someData: T) {
 	headers {
-	  contentType = "application/json;charset=UTF-8"
+	  contentType = applicationJsonCharsetUTF8
 	}
 	configureForWritingString(Json.encodeToString(someData))
 
