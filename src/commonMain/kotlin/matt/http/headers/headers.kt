@@ -12,9 +12,9 @@ import matt.prim.str.joinWithSpaces
 class HTTPHeaders internal constructor(private val con: HTTPRequest) {
 
 
-  var contentType: String? by propProvider("Content-Type")
-  var accept: HTTPContentType? by propProvider<HTTPContentType?>("Accept", HTTPContentTypeConverter)
-  var auth: Bearer? by propProvider("Authorization", BearerConverter)
+  var contentType: HTTPContentType? by propProvider("Content-Type", HTTPContentTypeConverter)
+  var accept: HTTPSpecificContentType? by propProvider("Accept", HTTPSpecificContentTypeConverter)
+  var auth: Auth? by propProvider("Authorization", BearerConverter)
 
   private fun propProvider(key: String) = provider {
 	varProp(
@@ -50,7 +50,7 @@ class HTTPHeaders internal constructor(private val con: HTTPRequest) {
 
 
 enum class HTTPContentType(val string: String? = null) {
-  applicationVndGitHubJson("application/vnd.github+json");
+  applicationJson("application/json");
 
   fun asString() = string ?: name
 }
@@ -68,16 +68,43 @@ object HTTPContentTypeConverter: StringConverter<HTTPContentType> {
 
 }
 
+enum class HTTPSpecificContentType(val string: String? = null) {
+  applicationVndHerokuJson("application/vnd.heroku+json; version=3"),
+  applicationVndGitHubJson("application/vnd.github+json");
 
-class Bearer(val token: String)
-object BearerConverter: StringConverter<Bearer> {
-  private val BEARER = "Bearer"
-  override fun toString(t: Bearer): String {
-	return arrayOf(BEARER,t.token).joinWithSpaces()
+  fun asString() = string ?: name
+}
+
+object HTTPSpecificContentTypeConverter: StringConverter<HTTPSpecificContentType> {
+  override fun toString(t: HTTPSpecificContentType): String {
+	return t.asString()
   }
 
-  override fun fromString(s: String): Bearer {
-	return Bearer(s.substringAfter(BEARER).trim())
+  override fun fromString(s: String): HTTPSpecificContentType {
+	return HTTPSpecificContentType.values().firstOrNull {
+	  it.asString() == s
+	} ?: error("could not find content type \"$s\"")
+  }
+
+}
+
+enum class AuthType {
+  Bearer, Token
+}
+
+data class Auth(
+  val authType: AuthType,
+  val token: String
+)
+
+
+object BearerConverter: StringConverter<Auth> {
+  override fun toString(t: Auth): String {
+	return arrayOf(t.authType.name, t.token).joinWithSpaces()
+  }
+
+  override fun fromString(s: String): Auth {
+	return Auth(authType = AuthType.valueOf(s.substringBefore(' ').trim()), token = s.substringAfter(' ').trim())
   }
 
 }
