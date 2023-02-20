@@ -49,7 +49,7 @@ actual class HTTPRequestImpl internal actual constructor(override val url: FileO
   }
 
   actual override fun setRequestProperty(name: String, value: String?) {
-	println("setting request property $name to $value")
+	/*println("setting request property $name to $value")*/
 	jCon.setRequestProperty(name, value)
   }
 
