@@ -70,6 +70,8 @@ import kotlin.time.Duration
   //	writeStringNow(Json.encodeToString(someData))
   //  }
 
+
+
   inline fun <reified T> configureForWritingJson(someData: T) {
 	headers {
 	  contentType = applicationJsonCharsetUTF8
@@ -99,6 +101,7 @@ expect class HTTPRequestImpl internal constructor(url: FileOrURL): HTTPRequest {
 
   override fun openConnection(): HTTPConnectResult
 }
+
 
 var HTTPRequestImpl.data: ByteArray
   get() = ILLEGAL

@@ -14,6 +14,7 @@ object ConnectionRefused: HTTPConnectFailure
 
 interface HTTPResponse: HTTPConnectResult {
 
+  val bytes: ByteArray
   val text: String
   val statusCode: Int
   val statusMessage: String
