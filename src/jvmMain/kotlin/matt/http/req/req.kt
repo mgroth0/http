@@ -1,7 +1,5 @@
 package matt.http.req
 
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import matt.file.FileOrURL
 import matt.file.MFile
 import matt.http.connection.ConnectionRefused
@@ -10,11 +8,11 @@ import matt.http.connection.HTTPConnectResult
 import matt.http.connection.JHTTPAsyncConnection
 import matt.http.connection.JHTTPConnection
 import matt.http.connection.Timeout
+import matt.http.live.JLiveHTTPConnection
 import matt.http.method.HTTPMethod
 import matt.http.req.write.AsyncWriter
 import matt.http.req.write.BasicHTTPWriter
-import matt.http.req.write.HTTPWriter
-import matt.lang.go
+import matt.lang.sync
 import java.net.ConnectException
 import java.net.HttpURLConnection
 import java.net.SocketTimeoutException
@@ -25,23 +23,13 @@ import kotlin.time.Duration.Companion.milliseconds
 
 actual class HTTPRequestImpl internal actual constructor(override val url: FileOrURL): HTTPRequest() {
 
-//  init {
-//	println("configuring connection for ${url.cpath}")
-//	Thread.dumpStack()
-//  }
+  //  init {
+  //	println("configuring connection for ${url.cpath}")
+  //	Thread.dumpStack()
+  //  }
 
   private val jCon = URI(url.cpath).toURL().openConnection() as HttpURLConnection
   private val con = JHTTPConnection(jCon)
-
-  fun writeBytesNow(bytes: ByteArray) {
-	//	jCon.doOutput = true
-	jCon.outputStream.write(bytes)
-  }
-
-  fun writeStringNow(string: String) = writeBytesNow(string.encodeToByteArray())
-  inline fun <reified T> writeAsJsonNow(someData: T) {
-	writeStringNow(Json.encodeToString(someData))
-  }
 
 
   override fun getRequestProperty(name: String): String? {
@@ -71,34 +59,57 @@ actual class HTTPRequestImpl internal actual constructor(override val url: FileO
 	}
 
 
-  var writer: HTTPWriter? = null
-	set(value) {
-	  require(field == null)
-	  if (value != null) jCon.doOutput = true
-	  field = value
-	}
-
   fun writeAsync(file: MFile) {
-	//	jCon.doOutput = true
-	writer = AsyncWriter(this, file)
+	outputDuringConnection {
+	  AsyncWriter(this, file).write()
+	}
   }
-
-  internal val outputStream get() = jCon.outputStream
 
 
   override fun configureForWritingBytes(bytes: ByteArray) {
-	//	jCon.doOutput = true
-	writer = BasicHTTPWriter(this, bytes)
+	outputDuringConnection {
+	  BasicHTTPWriter(this, bytes).write()
+	}
+  }
+
+
+  private var didLiveConnectionOps = false
+  private val liveConnectionOps = mutableListOf<JLiveHTTPConnection.()->Unit>()
+
+  @Synchronized
+  fun outputDuringConnection(op: JLiveHTTPConnection.()->Unit) {
+	require(!didLiveConnectionOps)
+	jCon.doOutput = true
+	liveConnectionOps += op
   }
 
 
   actual override fun openConnection(): HTTPConnectResult {
+	println("openConnection1")
 	return try {
+	  println("openConnection2")
 	  jCon.connect()
-	  writer?.go {
-		it.write()
+
+	  println("openConnection3")
+
+
+	  if (liveConnectionOps.isNotEmpty()) {
+		sync {
+		  val liveConnection = JLiveHTTPConnection(jCon)
+		  liveConnectionOps.forEach {
+			liveConnection.it()
+		  }
+		  liveConnection.outputStream.close()
+		  didLiveConnectionOps = true
+		}
 	  }
+
+
+
+
+	  println("openConnection4")
 	  jCon.errorStream?.readAllBytes()?.let {
+		println("openConnection4.5")
 
 		/*
 		*
@@ -119,6 +130,7 @@ actual class HTTPRequestImpl internal actual constructor(override val url: FileO
 		  println("no error message from server")
 		}
 	  }
+	  println("openConnection5")
 	  con
 	} catch (e: SocketTimeoutException) {
 	  println("Timeout!")

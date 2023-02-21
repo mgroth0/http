@@ -6,8 +6,8 @@ import matt.file.FileOrURL
 import matt.http.connection.HTTPAsyncConnection
 import matt.http.connection.HTTPConnectResult
 import matt.http.connection.HTTPResponse
-import matt.http.headers.HTTPContentType.applicationJsonCharsetUTF8
 import matt.http.headers.HTTPHeaders
+import matt.http.headers.HTTPMediaType.applicationJsonCharsetUTF8
 import matt.http.method.HTTPMethod
 import matt.lang.ILLEGAL
 import matt.lang.anno.SeeURL
@@ -82,6 +82,7 @@ import kotlin.time.Duration
 }
 
 expect class HTTPRequestImpl internal constructor(url: FileOrURL): HTTPRequest {
+
   var timeout: Duration?
 
   /*method = PUT

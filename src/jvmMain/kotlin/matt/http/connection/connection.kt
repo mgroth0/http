@@ -3,6 +3,7 @@
 package matt.http.connection
 
 import matt.lang.function.Consume
+import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
 import kotlin.concurrent.thread
@@ -22,7 +23,16 @@ class JHTTPConnection internal constructor(private val jCon: HttpURLConnection):
 	  jCon.readTimeout = value?.inWholeMilliseconds?.toInt() ?: 0
 	}
   override val text by lazy {
-	inputStream.bufferedReader().readText()
+	try {
+	  inputStream.bufferedReader().readText()
+	} catch (e: IOException) {
+	  println("GOT $e")
+	  println("status=${statusCode}")
+	  println("statusMessage=${statusMessage}")
+	  println("errorMessage=${jCon.errorStream?.readAllBytes()?.decodeToString()}")
+	  throw e
+	}
+
   }
 
   override val statusMessage: String

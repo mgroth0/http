@@ -12,8 +12,8 @@ import matt.prim.str.joinWithSpaces
 class HTTPHeaders internal constructor(private val con: HTTPRequest) {
 
 
-  var contentType: HTTPContentType? by propProvider("Content-Type", HTTPContentTypeConverter)
-  var accept: HTTPSpecificContentType? by propProvider("Accept", HTTPSpecificContentTypeConverter)
+  var contentType: HTTPMediaType? by propProvider("Content-Type", HTTPContentTypeConverter)
+  var accept: HTTPMediaType? by propProvider("Accept", HTTPContentTypeConverter)
   var auth: Auth? by propProvider("Authorization", BearerConverter)
 
   private fun propProvider(key: String) = provider {
@@ -49,45 +49,31 @@ class HTTPHeaders internal constructor(private val con: HTTPRequest) {
 }
 
 
-enum class HTTPContentType(val string: String? = null) {
+enum class HTTPMediaType(val string: String? = null) {
   applicationJson("application/json"),
-  applicationJsonCharsetUTF8("application/json;charset=UTF-8");
-
-  fun asString() = string ?: name
-}
-
-object HTTPContentTypeConverter: StringConverter<HTTPContentType> {
-  override fun toString(t: HTTPContentType): String {
-	return t.asString()
-  }
-
-  override fun fromString(s: String): HTTPContentType {
-	return HTTPContentType.values().firstOrNull {
-	  it.asString() == s
-	} ?: error("could not find content type \"$s\"")
-  }
-
-}
-
-enum class HTTPSpecificContentType(val string: String? = null) {
+  applicationJsonCharsetUTF8("application/json;charset=UTF-8"),
   applicationVndHerokuJson("application/vnd.heroku+json; version=3"),
   applicationVndGitHubJson("application/vnd.github+json");
 
   fun asString() = string ?: name
 }
 
-object HTTPSpecificContentTypeConverter: StringConverter<HTTPSpecificContentType> {
-  override fun toString(t: HTTPSpecificContentType): String {
+object HTTPContentTypeConverter: StringConverter<HTTPMediaType> {
+  override fun toString(t: HTTPMediaType): String {
 	return t.asString()
   }
 
-  override fun fromString(s: String): HTTPSpecificContentType {
-	return HTTPSpecificContentType.values().firstOrNull {
+  override fun fromString(s: String): HTTPMediaType {
+	return HTTPMediaType.values().firstOrNull {
 	  it.asString() == s
 	} ?: error("could not find content type \"$s\"")
   }
 
 }
+
+
+
+
 
 enum class AuthType {
   Bearer, Token
