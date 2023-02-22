@@ -231,12 +231,12 @@ actual class HTTPRequestImpl internal actual constructor(override val url: FileO
 
   @Synchronized
   actual override fun openConnection(): HTTPConnectResult {
-	println("connect 1: $url")
+//	println("connect 1: $url")
 	require(!didConnect)
 	didConnect = true
 	return try {
 
-	  println("connect 2: $url")
+//	  println("connect 2: $url")
 	  val client = HttpClient
 		.newBuilder()
 
@@ -246,9 +246,9 @@ actual class HTTPRequestImpl internal actual constructor(override val url: FileO
 	  //	  var response: HttpResponse.ResponseInfo? = null
 
 
-	  println("connect 3: $url")
+//	  println("connect 3: $url")
 	  val response = client.sendAsync(jCon, BodyHandlers.ofInputStream())
-	  println("connect 4: $url")
+//	  println("connect 4: $url")
 	  /*jCon.connect()*/
 
 	  /*println("THE METHOD 2 for ${jCon.url} is ${jCon.requestMethod}")*/
@@ -265,7 +265,7 @@ actual class HTTPRequestImpl internal actual constructor(override val url: FileO
 		  didLiveConnectionOps = true
 		}
 	  }
-	  println("connect 5: $url")
+//	  println("connect 5: $url")
 
 
 	  JHTTPConnection(response.get())
