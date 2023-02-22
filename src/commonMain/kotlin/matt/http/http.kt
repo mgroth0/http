@@ -30,9 +30,9 @@ fun FileOrURL.http(
 ): HTTPConnectResult {
   val req = HTTPRequestImpl(this)
 
-  println("created req")
+//  println("created req")
   req.op()
-  println("did req op")
+//  println("did req op")
   return req.connectSync()
 }
 

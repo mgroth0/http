@@ -85,12 +85,9 @@ actual class HTTPRequestImpl internal actual constructor(override val url: FileO
 
 
   actual override fun openConnection(): HTTPConnectResult {
-	println("openConnection1")
 	return try {
-	  println("openConnection2")
 	  jCon.connect()
 
-	  println("openConnection3")
 
 
 	  if (liveConnectionOps.isNotEmpty()) {
@@ -107,31 +104,10 @@ actual class HTTPRequestImpl internal actual constructor(override val url: FileO
 
 
 
-	  println("openConnection4")
-	  jCon.errorStream?.readAllBytes()?.let {
-		println("openConnection4.5")
-
-		/*
-		*
-		*   * <p>This method will not cause a connection to be initiated.  If
-		* the connection was not connected, or if the server did not have
-		* an error while connecting or if the server had an error but
-		* no error data was sent, this method will return null. This is
-		* the default.
-		*
-		* @return an error stream if any, null if there have been no
-		* errors, the connection is not connected or the server sent no
-		* useful data.
-		* */
-
-		println("ERR: ${it.decodeToString()}")
-	  } ?: run {
-		if (verbose) {
-		  println("no error message from server")
-		}
-	  }
-	  println("openConnection5")
 	  con
+
+
+
 	} catch (e: SocketTimeoutException) {
 	  println("Timeout!")
 	  return Timeout
