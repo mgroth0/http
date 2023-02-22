@@ -2,11 +2,12 @@ package matt.http.live
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.net.HttpURLConnection
+import java.io.OutputStream
 
-class JLiveHTTPConnection(private val jCon: HttpURLConnection): LiveHTTPConnection {
+/*HttpURLConnection*/
+class JLiveHTTPConnection(private val jCon: OutputStream): LiveHTTPConnection {
 
-  internal val outputStream get() = jCon.outputStream
+  internal val outputStream get() = jCon/*.outputStream*/
 
   fun writeBytesNow(bytes: ByteArray) {
 
@@ -15,7 +16,7 @@ class JLiveHTTPConnection(private val jCon: HttpURLConnection): LiveHTTPConnecti
 	//	jCon.doOutput = true
 	println("trying to get jCon output stream...")
 	try {
-	  val oStream = jCon.outputStream
+	  val oStream = jCon/*.outputStream*/
 	  println("got ostream. Writing...")
 	  oStream.write(bytes)
 	  println("wrote!")
