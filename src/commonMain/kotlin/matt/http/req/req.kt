@@ -16,7 +16,7 @@ import kotlin.time.Duration
 
 @SeeURL("https://youtrack.jetbrains.com/issue/KT-20427") abstract class HTTPRequest {
 
-  abstract protected val url: FileOrURL
+  protected abstract val url: FileOrURL
 
 
   var verbose = false
@@ -73,6 +73,9 @@ import kotlin.time.Duration
 
 
   inline fun <reified T> configureForWritingJson(someData: T) {
+
+
+
 	headers {
 	  contentType = applicationJsonCharsetUTF8
 	}

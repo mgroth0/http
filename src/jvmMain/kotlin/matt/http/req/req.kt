@@ -10,6 +10,7 @@ import matt.http.connection.JHTTPConnection
 import matt.http.connection.Timeout
 import matt.http.live.JLiveHTTPConnection
 import matt.http.method.HTTPMethod
+import matt.http.method.HTTPMethod.DELETE
 import matt.http.method.HTTPMethod.GET
 import matt.http.method.HTTPMethod.PATCH
 import matt.http.method.HTTPMethod.POST
@@ -66,38 +67,28 @@ actual class HTTPRequestImpl internal actual constructor(override val url: FileO
 	init {
 	  allowMethods("PATCH")
 	}
-  }*/
-  //  init {
+  }*/ //  init {
   //	println("configuring connection for ${url.cpath}")
   //	Thread.dumpStack()
   //  }
 
 
-  /*https://www.baeldung.com/java-9-http-client*/
-  /*private val jCon = URI(url.cpath).toURL().openConnection() as HttpURLConnection*/
+  /*https://www.baeldung.com/java-9-http-client*//*private val jCon = URI(url.cpath).toURL().openConnection() as HttpURLConnection*/
   private var jCon = HttpRequest.newBuilder().uri(URI(url.cpath)).GET().build()
 
   /*private var con = JHTTPConnection(jCon)*/
 
 
-  @Synchronized
-  override fun getRequestProperty(name: String): String? {
-	return jCon.headers().map()[name]?.single()
-	/*return jCon.getRequestProperty(name)*/
+  @Synchronized override fun getRequestProperty(name: String): String? {
+	return jCon.headers().map()[name]?.single()	/*return jCon.getRequestProperty(name)*/
   }
 
-  @Synchronized
-  actual override fun setRequestProperty(name: String, value: String?) {
+  @Synchronized actual override fun setRequestProperty(name: String, value: String?) {
 	require(!didConnect)
 	if (value == null) {
-	  jCon = HttpRequest
-		.newBuilder(jCon, BiPredicate { k, _ -> k != name })
-		.build()
+	  jCon = HttpRequest.newBuilder(jCon, BiPredicate { k, _ -> k != name }).build()
 	} else {
-	  jCon = HttpRequest
-		.newBuilder(jCon, BiPredicate { _, _ -> true })
-		.header(name, value)
-		.build()
+	  jCon = HttpRequest.newBuilder(jCon, BiPredicate { _, _ -> true }).header(name, value).build()
 	}
 
 
@@ -116,12 +107,10 @@ actual class HTTPRequestImpl internal actual constructor(override val url: FileO
 		}
 	*/
 
-	/*println("setting request property $name to $value")*/
-	/*jCon.setRequestProperty(name, value)*/
+	/*println("setting request property $name to $value")*/	/*jCon.setRequestProperty(name, value)*/
   }
 
-  @Synchronized
-  /*actual override fun allRequestHeaders() = jCon.requestProperties*/
+  @Synchronized/*actual override fun allRequestHeaders() = jCon.requestProperties*/
   actual override fun allRequestHeaders() = jCon.headers().map().toMap()
 
 
@@ -132,7 +121,6 @@ actual class HTTPRequestImpl internal actual constructor(override val url: FileO
   }
 
   private val outputStream by lazy { writeStreams.second }
-
 
 
   actual override var method: HTTPMethod
@@ -177,12 +165,12 @@ actual class HTTPRequestImpl internal actual constructor(override val url: FileO
 	  val builder = HttpRequest.newBuilder(jCon, BiPredicate { _, _ -> true })
 	  fun publisher() = BodyPublishers.ofInputStream(Supplier { writeStreams.first })
 	  jCon = when (value) {
-		GET   -> builder.GET().build()
-		POST  -> builder.POST(publisher()).build()
-		PUT   -> builder.PUT(publisher()).build()
-		PATCH -> builder.method("PATCH", publisher()).build()
-	  }
-	  /*con = JHTTPConnection(jCon)*/
+		GET    -> builder.GET().build()
+		POST   -> builder.POST(publisher()).build()
+		PUT    -> builder.PUT(publisher()).build()
+		PATCH  -> builder.method("PATCH", publisher()).build()
+		DELETE -> builder.DELETE().build()
+	  }	/*con = JHTTPConnection(jCon)*/
 
 
 	}
@@ -194,22 +182,23 @@ actual class HTTPRequestImpl internal actual constructor(override val url: FileO
 	@Synchronized get() = jCon.timeout().getOrNull()?.toKotlinDuration()
 	@Synchronized set(value) {
 	  require(!didConnect)
-	  jCon = HttpRequest.newBuilder(jCon, BiPredicate { _, _ -> true }).timeout(value?.toJavaDuration()).build()
-	  /*con = JHTTPConnection(jCon)*/
-	  /*jCon.connectTimeout = value?.inWholeMilliseconds?.toInt() ?: 0*/
+	  jCon = HttpRequest.newBuilder(jCon, BiPredicate { _, _ -> true })
+		.timeout(value?.toJavaDuration())
+		.build()	/*con = JHTTPConnection(jCon)*/	/*jCon.connectTimeout = value?.inWholeMilliseconds?.toInt() ?: 0*/
 	}
 
-  @Synchronized
-  fun writeAsync(file: MFile) {
+  @Synchronized fun writeAsync(file: MFile) {
 	require(!didConnect)
 	outputDuringConnection {
 	  AsyncWriter(this, file).write()
 	}
   }
 
-  @Synchronized
-  override fun configureForWritingBytes(bytes: ByteArray) {
+  @Synchronized override fun configureForWritingBytes(bytes: ByteArray) {
 	require(!didConnect)
+	val builder = HttpRequest.newBuilder(jCon, BiPredicate { _, _ -> true })
+	fun publisher() = BodyPublishers.ofInputStream(Supplier { writeStreams.first })
+	jCon = builder.method(method.name, publisher()).build()
 	outputDuringConnection {
 	  BasicHTTPWriter(this, bytes).write()
 	}
@@ -219,36 +208,29 @@ actual class HTTPRequestImpl internal actual constructor(override val url: FileO
   private var didLiveConnectionOps = false
   private val liveConnectionOps = mutableListOf<JLiveHTTPConnection.()->Unit>()
 
-  @Synchronized
-  fun outputDuringConnection(op: JLiveHTTPConnection.()->Unit) {
-	require(!didLiveConnectionOps)
-	/*jCon.doOutput = true*/
+  @Synchronized fun outputDuringConnection(op: JLiveHTTPConnection.()->Unit) {
+	require(!didLiveConnectionOps)	/*jCon.doOutput = true*/
 	liveConnectionOps += op
   }
 
 
   private var didConnect = false
 
-  @Synchronized
-  actual override fun openConnection(): HTTPConnectResult {
-//	println("connect 1: $url")
+  @Synchronized actual override fun openConnection(): HTTPConnectResult {	//	println("connect 1: $url")
 	require(!didConnect)
 	didConnect = true
 	return try {
 
-//	  println("connect 2: $url")
-	  val client = HttpClient
-		.newBuilder()
+	  //	  println("connect 2: $url")
+	  val client = HttpClient.newBuilder()
 
 		.build()
 
-	  /*println("THE METHOD 1 for ${jCon.url} is ${jCon.requestMethod}")*/
-	  //	  var response: HttpResponse.ResponseInfo? = null
+	  /*println("THE METHOD 1 for ${jCon.url} is ${jCon.requestMethod}")*/	//	  var response: HttpResponse.ResponseInfo? = null
 
 
-//	  println("connect 3: $url")
-	  val response = client.sendAsync(jCon, BodyHandlers.ofInputStream())
-//	  println("connect 4: $url")
+	  //	  println("connect 3: $url")
+	  val response = client.sendAsync(jCon, BodyHandlers.ofInputStream())	//	  println("connect 4: $url")
 	  /*jCon.connect()*/
 
 	  /*println("THE METHOD 2 for ${jCon.url} is ${jCon.requestMethod}")*/
@@ -264,12 +246,10 @@ actual class HTTPRequestImpl internal actual constructor(override val url: FileO
 		  liveConnection.outputStream.close()
 		  didLiveConnectionOps = true
 		}
-	  }
-//	  println("connect 5: $url")
+	  }	//	  println("connect 5: $url")
 
 
-	  JHTTPConnection(response.get())
-	  /*con*/
+	  JHTTPConnection(response.get())	/*con*/
 
 
 	} catch (e: SocketTimeoutException) {
@@ -281,8 +261,7 @@ actual class HTTPRequestImpl internal actual constructor(override val url: FileO
 	}
   }
 
-  @Synchronized
-  override fun openAsyncConnection(): HTTPAsyncConnection {
+  @Synchronized override fun openAsyncConnection(): HTTPAsyncConnection {
 	require(!didConnect)
 	didConnect = true
 	var r: HTTPConnectResult? = null
