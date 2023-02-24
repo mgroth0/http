@@ -22,8 +22,8 @@ class JSHTTPConnection(private val xmlHttpRequest: XMLHttpRequest): HTTPResponse
 	}
   override val text: String
 	get() = xmlHttpRequest.responseText
-  override val statusCode: Int
-	get() = xmlHttpRequest.status.toInt()
+  override val statusCode: Short
+	get() = xmlHttpRequest.status
 
 
   //  val httpData by lazy {

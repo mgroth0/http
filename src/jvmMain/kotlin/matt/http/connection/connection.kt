@@ -2,7 +2,6 @@
 
 package matt.http.connection
 
-import matt.lang.err
 import matt.lang.function.Consume
 import java.io.InputStream
 import java.net.http.HttpResponse
@@ -15,11 +14,7 @@ typealias JavaHTTPRequest = java.net.http.HttpRequest
 class JHTTPConnection internal constructor(jCon: HttpResponse<InputStream>): HTTPResponse {
 
 
-  override val statusCode = jCon.statusCode().also {
-	if (it > 300) {
-	  err("is this an error? ${it},${jCon.body().readAllBytes().decodeToString()}")
-	}
-  }
+  override val statusCode = jCon.statusCode().toShort()
 
   private var onlyOne = 0
   val inputStream = jCon.body()
@@ -139,7 +134,6 @@ class JHTTPConnection internal constructor(jCon: HttpResponse<InputStream>): HTT
 
 }
 
-val HTTPResponse.inputStream get() = (this as JHTTPConnection).inputStream
 
 
 class JHTTPAsyncConnection(private val resultGetter: ()->HTTPConnectResult): HTTPAsyncConnection {
