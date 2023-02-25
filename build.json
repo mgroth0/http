@@ -1,5 +1,7 @@
 {
-  "type" :         "matt.mstruct.bj.MultiPlatformModule", "jvm": {}, "js": "LIB",
+  "type" :         "matt.mstruct.bj.MultiPlatformModule",
+  "jvm" :          {},
+  "js" :           "LIB",
   "dependencies" : [
 	{
 	  "type" : "Lib",
@@ -10,6 +12,11 @@
 	  "type" : "Project",
 	  "cfg" :  "commonMainApi",
 	  "path" : ":k:file"
+	},
+	{
+	  "type" : "Project",
+	  "cfg" :  "jvmMainApi",
+	  "path" : ":k:async"
 	}
   ]
 }

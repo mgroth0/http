@@ -2,10 +2,8 @@
 
 package matt.http.connection
 
-import matt.lang.function.Consume
 import java.io.InputStream
 import java.net.http.HttpResponse
-import kotlin.concurrent.thread
 
 
 typealias JavaHTTPRequest = java.net.http.HttpRequest
@@ -124,13 +122,3 @@ class JHTTPConnection internal constructor(jCon: HttpResponse<InputStream>): HTT
 
 
 
-class JHTTPAsyncConnection(private val resultGetter: ()->HTTPConnectResult): HTTPAsyncConnection {
-
-  override fun whenDone(op: Consume<HTTPConnectResult>) {
-	/*obviously this can be done way more efficiently*/
-	thread {
-	  op(resultGetter())
-	}
-  }
-
-}

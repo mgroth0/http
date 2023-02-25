@@ -1,6 +1,7 @@
 package matt.http.internet
 
 import matt.lang.not
+import matt.model.code.valjson.ValJson.Port
 
 class TheInternet {
   //  val wasNotAvailableInThisRuntime get() = not(wasAvailableInThisRuntime)
@@ -17,3 +18,7 @@ class TheInternet {
 expect fun TheInternet.isAvailable(): Boolean
 
 fun TheInternet.isNotAvailable() = not(isAvailable())
+
+
+/*not https*/
+val LOCAL_TEST_URL = "http://0.0.0.0:${Port.localKtorTest}"

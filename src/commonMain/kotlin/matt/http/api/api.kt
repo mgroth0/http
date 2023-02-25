@@ -4,7 +4,7 @@ import matt.http.headers.HTTPHeaders
 import matt.http.http
 import matt.http.httpAsync
 import matt.http.req.HTTPRequestImpl
-import matt.http.req.headers
+import matt.http.headers.headers
 import matt.http.url.MURL
 
 open class API(

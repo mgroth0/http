@@ -7,6 +7,9 @@ import matt.lang.delegation.varProp
 import matt.model.op.convert.StringConverter
 import matt.prim.str.joinWithSpaces
 
+fun HTTPRequest.headers(op: HTTPHeaders.()->Unit) {
+  HTTPHeaders(this).apply(op)
+}
 
 @HTTPDslMarker
 class HTTPHeaders internal constructor(private val con: HTTPRequest) {
@@ -95,3 +98,4 @@ object BearerConverter: StringConverter<Auth> {
   }
 
 }
+
