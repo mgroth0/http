@@ -7,20 +7,22 @@ import matt.lang.function.Consume
 sealed interface HTTPConnectResult {
   @SeeURL("https://developer.mozilla.org/en-US/docs/Web/HTTP/Status")
   fun requireSuccessful() = (this as HTTPResponse).apply {
-	when {
-	  statusCode in 300..399 -> throw RedirectionException(statusCode, text)
-	  statusCode in 400..499 -> throw when (statusCode.toInt()) {
+	when (statusCode) {
+	  in 300..399 -> throw RedirectionException(statusCode, text)
+	  in 400..499 -> throw when (statusCode.toInt()) {
 		401  -> UnauthorizedException(text)
 		else -> ClientErrorException(statusCode, text)
 	  }
-
-	  statusCode in 500..599 -> throw ServerErrorException(statusCode, text)
+	  in 500..599 -> throw ServerErrorException(statusCode, text)
 	}
 	require(statusCode in 100..300) {
 	  "weird status code: $statusCode"
 	}
   }
 }
+
+
+
 
 sealed class HTTPProblemException(status: Short, message: String): Exception("$status: ${message}")
 class RedirectionException(status: Short, message: String): HTTPProblemException(status, message)
@@ -35,11 +37,9 @@ object Timeout: HTTPConnectFailure
 object ConnectionRefused: HTTPConnectFailure
 
 interface HTTPResponse: HTTPConnectResult {
-
   val bytes: ByteArray
   val text: String
   val statusCode: Short
-  val statusMessage: String
 }
 
 fun HTTPResponse.print() {
