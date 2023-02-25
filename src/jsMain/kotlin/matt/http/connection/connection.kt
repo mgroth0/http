@@ -35,7 +35,6 @@ class JSHTTPConnection(private val xmlHttpRequest: XMLHttpRequest): HTTPResponse
   //	)
   //  }
 
-  override val statusMessage: String get() = xmlHttpRequest.statusText
 
   val currentReadyState get() = ReadyState.values()[xmlHttpRequest.readyState.toInt()]
 }

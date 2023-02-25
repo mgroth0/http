@@ -116,20 +116,8 @@ class JHTTPConnection internal constructor(jCon: HttpResponse<InputStream>): HTT
 	fullRead.decodeToString()
   }
 
-  override val statusMessage: String
-	get() {
-	  return "status message?"
-	  /*try {
-		return jCon.responseMessage
-	  } catch (e: Exception) {
-		checkForErrorMessages()
-		throw e
-	  }*/
-
-	}
-
   override fun toString(): String {
-	return "JHTTPConnection[status=${statusCode},message=${statusMessage}]"
+	return "JHTTPConnection[status=${statusCode}]"
   }
 
 }
