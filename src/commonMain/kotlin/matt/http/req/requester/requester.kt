@@ -68,7 +68,6 @@ data class HTTPRequester(
 
   suspend fun send(): HTTPConnectResult {
 	val startedTrying = UnixTime()
-	var triedFor: Duration = Duration.ZERO
 	val attempts = mutableListOf<HTTPRequestAttempt>()
 	for (attemptNum in 0 until numAttempts) {
 	  val tSent = UnixTime() - startedTrying
@@ -85,8 +84,7 @@ data class HTTPRequester(
 	  ) {
 		delay(interAttemptWait)
 	  }
-	  triedFor = UnixTime() - startedTrying
-	  if (triedFor > keepTryingFor) {
+	  if (tGotResult > keepTryingFor) {
 		return TriedForTooLongException(attempts)
 	  }
 	}
