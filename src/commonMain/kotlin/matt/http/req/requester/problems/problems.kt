@@ -4,13 +4,16 @@ import matt.http.connection.HTTPConnectionProblem
 import matt.prim.str.maybePlural
 import kotlin.time.Duration
 
-class TooManyRetrysException(numAttempts: Int): HTTPConnectionProblem(
+
+sealed class TooMuchRetryingException(numAttempts: Int, triedFor: Duration): HTTPConnectionProblem(
   "No successful connection after $numAttempts ${
 	maybePlural(
 	  numAttempts, "attempt"
 	)
-  }"
+  } (${triedFor})"
 )
+class TooManyRetrysException(numAttempts: Int, triedFor: Duration): TooMuchRetryingException(numAttempts,triedFor)
+class TriedForTooLongException(numAttempts: Int, triedFor: Duration): TooMuchRetryingException(numAttempts,triedFor)
 
 sealed class NoConnectionException(message: String): HTTPConnectionProblem("No Connection: $message")
 class HTTPConnectionRefused: NoConnectionException("Connection Refused")

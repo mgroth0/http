@@ -6,18 +6,32 @@ import matt.http.connection.HTTPConnection
 import matt.http.connection.HTTPConnectionProblem
 import matt.http.lib.HTTPRequestBuilder
 import matt.http.req.HTTPRequest
+import matt.http.req.ImmutableHTTPRequest
 import matt.http.req.requester.problems.ClientErrorException
 import matt.http.req.requester.problems.RedirectionException
 import matt.http.req.requester.problems.ServerErrorException
 import matt.http.req.requester.problems.TooManyRetrysException
+import matt.http.req.requester.problems.TriedForTooLongException
 import matt.http.req.requester.problems.UnauthorizedException
 import matt.http.req.requester.problems.WeirdStatusCodeException
 import matt.lang.anno.SeeURL
-import matt.model.code.delegate.LimitedInt
+import matt.time.UnixTime
 import matt.time.dur.isNotZero
 import kotlin.time.Duration
 
-class HTTPRequester {
+data class HTTPRequester(
+  val request: ImmutableHTTPRequest = HTTPRequest.EXAMPLE,
+  val timeout: Duration? = null,
+  val numAttempts: Int = 1,
+  val keepTryingFor: Duration = Duration.ZERO,
+  val interAttemptWait: Duration = Duration.ZERO,
+  val retryOn: suspend (HTTPConnectResult)->Boolean = { false },
+  val verbose: Boolean = false
+) {
+
+  init {
+	require(numAttempts >= 1)
+  }
 
   companion object {
 	val DEFAULT by lazy {
@@ -25,11 +39,6 @@ class HTTPRequester {
 	}
   }
 
-  var request: HTTPRequest = HTTPRequest.EXAMPLE
-  var timeout: Duration? = null
-  var numAttempts by LimitedInt(1, min = 1)
-
-  var interAttemptWait = Duration.ZERO
 
   @Suppress("SetterBackingFieldAssignment") @SeeURL("https://developer.mozilla.org/en-US/docs/Web/HTTP/Status")
   var checkConnection: suspend (HTTPConnectResult)->HTTPConnectResult = { it ->
@@ -56,20 +65,27 @@ class HTTPRequester {
 	}
 
 
-  var retryOn: suspend (HTTPConnectResult)->Boolean = { false }
-  var verbose = false
-
-
   suspend fun send(): HTTPConnectResult {
+	val startedTrying = UnixTime()
+	var triedFor: Duration = Duration.ZERO
 	for (attemptNum in 0 until numAttempts) {
 	  val attempt = sendFromLib(timeout)
 	  if (retryOn(attempt)) Unit/*do nothing*/
 	  else {
 		return checkConnection(attempt)
 	  }
-	  if (attemptNum < (numAttempts - 1) && interAttemptWait.isNotZero) delay(interAttemptWait)
+	  if (
+		attemptNum < (numAttempts - 1)
+		&& interAttemptWait.isNotZero
+	  ) {
+		delay(interAttemptWait)
+	  }
+	  triedFor = UnixTime() - startedTrying
+	  if (triedFor > keepTryingFor) {
+		return TriedForTooLongException(numAttempts, triedFor)
+	  }
 	}
-	return TooManyRetrysException(numAttempts)
+	return TooManyRetrysException(numAttempts, triedFor)
   }
 
   suspend fun sendAndThrowUnlessConnectedCorrectly(): HTTPConnection {
