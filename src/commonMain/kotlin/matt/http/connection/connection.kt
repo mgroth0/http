@@ -45,6 +45,12 @@ class HTTPConnection(private val response: HttpResponse): HTTPConnectResult {
 	  return alreadyGotHTTPStatusCode!!
 	}
   }
+
+  suspend fun requireSuccessful(): HTTPConnection {
+	bytes()
+	return this
+  }
+
 }
 
 

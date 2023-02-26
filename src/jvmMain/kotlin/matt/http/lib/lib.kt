@@ -1,3 +1,5 @@
+@file:JvmName("LibJvmKt")
+
 package matt.http.lib
 
 import io.ktor.http.content.OutgoingContent

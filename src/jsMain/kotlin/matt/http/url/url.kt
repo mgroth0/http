@@ -1,6 +1,5 @@
 package matt.http.url
 
-import matt.http.connection.requireSuccessful
 import matt.http.http
 import org.w3c.dom.url.URL
 
@@ -21,6 +20,6 @@ actual class MURL actual constructor(path: String): CommonURL {
 
   /*private val requester by lazy { HTTPRequester(type = GET, this) { responseText } }*/
 
-  actual suspend fun loadText() = http().requireSuccessful().text
+  actual suspend fun loadText() = http().text()
     /*requester.send()*/
 }

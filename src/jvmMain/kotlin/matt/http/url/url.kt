@@ -1,7 +1,6 @@
 package matt.http.url
 
 import matt.file.URLLike
-import matt.http.connection.requireSuccessful
 import matt.http.http
 import java.awt.Desktop
 import java.net.URI
@@ -35,7 +34,7 @@ actual class MURL actual constructor(path: String): CommonURL, URLLike {
 
   actual override fun toString() = cpath
 
-  actual suspend fun loadText() = http().requireSuccessful().text
+  actual suspend fun loadText() = http().text()
 
   fun open() = Desktop.getDesktop().browse(jURL.toURI())
 
