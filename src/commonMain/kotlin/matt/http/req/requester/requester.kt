@@ -8,6 +8,7 @@ import matt.http.lib.HTTPRequestBuilder
 import matt.http.req.HTTPRequest
 import matt.http.req.ImmutableHTTPRequest
 import matt.http.req.requester.problems.ClientErrorException
+import matt.http.req.requester.problems.HTTPRequestAttempt
 import matt.http.req.requester.problems.RedirectionException
 import matt.http.req.requester.problems.ServerErrorException
 import matt.http.req.requester.problems.TooManyRetrysException
@@ -68,8 +69,12 @@ data class HTTPRequester(
   suspend fun send(): HTTPConnectResult {
 	val startedTrying = UnixTime()
 	var triedFor: Duration = Duration.ZERO
+	val attempts = mutableListOf<HTTPRequestAttempt>()
 	for (attemptNum in 0 until numAttempts) {
+	  val tSent = UnixTime() - startedTrying
 	  val attempt = sendFromLib(timeout)
+	  val tGotResult = UnixTime() - startedTrying
+	  attempts += HTTPRequestAttempt(tSent = tSent, tGotResult = tGotResult, result = attempt)
 	  if (retryOn(attempt)) Unit/*do nothing*/
 	  else {
 		return checkConnection(attempt)
@@ -82,10 +87,10 @@ data class HTTPRequester(
 	  }
 	  triedFor = UnixTime() - startedTrying
 	  if (triedFor > keepTryingFor) {
-		return TriedForTooLongException(numAttempts, triedFor)
+		return TriedForTooLongException(attempts)
 	  }
 	}
-	return TooManyRetrysException(numAttempts, triedFor)
+	return TooManyRetrysException(attempts)
   }
 
   suspend fun sendAndThrowUnlessConnectedCorrectly(): HTTPConnection {
