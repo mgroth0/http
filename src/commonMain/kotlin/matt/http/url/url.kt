@@ -26,7 +26,7 @@ expect class MURL(path: String): CommonURL {
 
   override fun toString(): String
 
-  fun loadText(): String
+  suspend fun loadText(): String
 }
 
 val EXAMPLE_MURL by lazy {
@@ -40,7 +40,7 @@ fun String.isValidHttpUrl(): Boolean {
 	return false
   }
 
-  return url.protocol === "http:" || url.protocol === "https:";
+  return url.protocol === "http:" || url.protocol === "https:"
 }
 
 fun fileOrURL(s: String): FileOrURL {

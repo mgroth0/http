@@ -2,15 +2,15 @@
 
 package matt.http
 
-import matt.http.req.HTTPRequestImpl
+import matt.http.req.MutableHTTPRequest
 import matt.http.url.MURL
 import java.net.URI
 import java.net.URL
 
 
 
-fun http(url: URI, op: HTTPRequestImpl.()->Unit = {}) = MURL(url).http(op)
+suspend fun http(url: URI, op: MutableHTTPRequest.()->Unit = {}) = MURL(url).http(op)
 
-fun http(url: URL, op: HTTPRequestImpl.()->Unit = {}) = MURL(url).http(op)
+suspend fun http(url: URL, op: MutableHTTPRequest.()->Unit = {}) = MURL(url).http(op)
 
 

@@ -1,18 +1,19 @@
 package matt.http.headers
 
 import matt.http.HTTPDslMarker
-import matt.http.req.HTTPRequest
+import matt.http.req.MutableHTTPRequest
+import matt.http.req.valueForHeader
 import matt.lang.delegation.provider
 import matt.lang.delegation.varProp
 import matt.model.op.convert.StringConverter
 import matt.prim.str.joinWithSpaces
 
-fun HTTPRequest.headers(op: HTTPHeaders.()->Unit) {
+fun MutableHTTPRequest.headers(op: HTTPHeaders.()->Unit) {
   HTTPHeaders(this).apply(op)
 }
 
 @HTTPDslMarker
-class HTTPHeaders internal constructor(private val con: HTTPRequest) {
+class HTTPHeaders internal constructor(private val con: MutableHTTPRequest) {
 
 
   var contentType: HTTPMediaType? by propProvider("Content-Type", HTTPContentTypeConverter)
@@ -21,33 +22,44 @@ class HTTPHeaders internal constructor(private val con: HTTPRequest) {
 
   private fun propProvider(key: String) = provider {
 	varProp(
-	  getter = {
-		con.getRequestProperty(key)
-	  },
+	  getter = { con.valueForHeader(key) },
 	  setter = {
-		con.setRequestProperty(key, it)
+		require(con.valueForHeader(key) == null) {
+		  "unclear if I am adding or setting here"
+		}
+		require(it != null) {
+		  "not sure how to handle this yet"
+		}
+		con.addHeader(key, it)
 	  }
 	)
   }
 
   private fun <T> propProvider(key: String, converter: StringConverter<T & Any>) = provider {
-
-
 	varProp(
 	  getter = {
-		val s = con.getRequestProperty(key)
+		val s = con.valueForHeader(key)
 		s?.let { converter.fromString(s) }
 	  },
 	  setter = {
-		con.setRequestProperty(key, it?.let { itNonNull ->
+
+		require(con.valueForHeader(key) == null) {
+		  "unclear if I am adding or setting here"
+		}
+		require(it != null) {
+		  "not sure how to handle this yet"
+		}
+
+		con.addHeader(key, it.let { itNonNull ->
 		  converter.toString(itNonNull)
 		})
+
 	  }
 	)
   }
 
   operator fun set(s: String, value: String) {
-	con.setRequestProperty(s, value)
+	error("unclear how to set or if I should set now that I understand that its not a map")
   }
 }
 
@@ -73,9 +85,6 @@ object HTTPContentTypeConverter: StringConverter<HTTPMediaType> {
   }
 
 }
-
-
-
 
 
 enum class AuthType {

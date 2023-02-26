@@ -1,15 +1,8 @@
 package matt.http.req.write
 
-import matt.http.req.HTTPRequestImpl
-import matt.lang.ILLEGAL
+sealed interface BodyWriter
+object NoBody: BodyWriter
+class BytesBodyWriter(val bytes: ByteArray): BodyWriter
+interface DuringConnectionWriter: BodyWriter
 
-var HTTPRequestImpl.data: ByteArray
-  get() = ILLEGAL
-  set(value) {
-    configureForWritingBytes(value)
-  }
-
-abstract class HTTPWriter {
-  internal abstract fun write()
-}
 

@@ -11,8 +11,6 @@ class JLiveHTTPConnection(private val jCon: OutputStream): LiveHTTPConnection {
 
   fun writeBytesNow(bytes: ByteArray) {
 
-
-
 	//	jCon.doOutput = true
 	println("trying to get jCon output stream...")
 	try {

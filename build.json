@@ -17,6 +17,15 @@
 	  "type" : "Project",
 	  "cfg" :  "jvmMainApi",
 	  "path" : ":k:async"
+	},
+	{
+	  "type" : "Project",
+	  "cfg" :  "commonMainApi",
+	  "path" : ":k:time"
+	},	{
+	  "type" : "Lib",
+	  "cfg" :  "commonMainApi",
+	  "key" : "ktorClientCore"
 	}
   ]
 }

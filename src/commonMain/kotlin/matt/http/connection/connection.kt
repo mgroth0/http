@@ -1,52 +1,49 @@
 package matt.http.connection
 
-import matt.lang.anno.SeeURL
-import matt.lang.function.Consume
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.readBytes
+import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import matt.log.todo.todo
 
 
-sealed interface HTTPConnectResult {
-  @SeeURL("https://developer.mozilla.org/en-US/docs/Web/HTTP/Status")
-  fun requireSuccessful() = (this as HTTPResponse).apply {
-	when (statusCode) {
-	  in 300..399 -> throw RedirectionException(statusCode, text)
-	  in 400..499 -> throw when (statusCode.toInt()) {
-		401  -> UnauthorizedException(text)
-		else -> ClientErrorException(statusCode, text)
+sealed interface HTTPConnectResult
+abstract class HTTPConnectionProblem(message: String): Exception(message), HTTPConnectResult
+
+class HTTPConnection(private val response: HttpResponse): HTTPConnectResult {
+
+  init {
+	todo("file.readChannel().efficientlyTransferTo(liveHTTPConnection.outputStream)")
+  }
+
+  private var alreadyReadBytes: ByteArray? = null
+  private val mutex = Mutex()
+
+  suspend fun bytes(): ByteArray {
+	mutex.withLock {
+	  if (alreadyReadBytes == null) {
+		alreadyReadBytes = response.readBytes()
 	  }
-	  in 500..599 -> throw ServerErrorException(statusCode, text)
+	  return alreadyReadBytes!!
 	}
-	require(statusCode in 100..300) {
-	  "weird status code: $statusCode"
+  }
+
+  suspend fun text(): String {
+	return bytes().decodeToString()
+  }
+
+  private var alreadyGotHTTPStatusCode: HttpStatusCode? = null
+  private val statusMutex = Mutex()
+
+  suspend fun statusCode(): HttpStatusCode {
+	statusMutex.withLock {
+	  if (alreadyGotHTTPStatusCode == null) {
+		alreadyGotHTTPStatusCode = response.status
+	  }
+	  return alreadyGotHTTPStatusCode!!
 	}
   }
 }
 
 
-
-
-sealed class HTTPProblemException(status: Short, message: String): Exception("$status: ${message}")
-class RedirectionException(status: Short, message: String): HTTPProblemException(status, message)
-sealed class HTTPErrorException(status: Short, message: String): HTTPProblemException(status, message)
-open class ClientErrorException(status: Short, message: String): HTTPErrorException(status, message)
-class UnauthorizedException(message: String): ClientErrorException(401, message)
-class ServerErrorException(status: Short, message: String): HTTPErrorException(status, message)
-
-sealed interface HTTPConnectFailure: HTTPConnectResult
-
-object Timeout: HTTPConnectFailure
-object ConnectionRefused: HTTPConnectFailure
-
-interface HTTPResponse: HTTPConnectResult {
-  val bytes: ByteArray
-  val text: String
-  val statusCode: Short
-}
-
-fun HTTPResponse.print() {
-  println(text)
-}
-
-
-interface HTTPAsyncConnection {
-  fun whenDone(op: Consume<HTTPConnectResult>)
-}
