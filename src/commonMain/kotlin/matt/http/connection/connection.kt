@@ -9,6 +9,7 @@ import matt.log.todo.todo
 
 
 sealed interface HTTPConnectResult
+
 abstract class HTTPConnectionProblem(message: String): Exception(message), HTTPConnectResult
 
 class HTTPConnection(private val response: HttpResponse): HTTPConnectResult {

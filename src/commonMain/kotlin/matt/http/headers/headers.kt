@@ -58,6 +58,7 @@ class HTTPHeaders internal constructor(private val con: MutableHTTPRequest) {
 	)
   }
 
+  @Suppress("UNUSED_PARAMETER")
   operator fun set(s: String, value: String) {
 	error("unclear how to set or if I should set now that I understand that its not a map")
   }
