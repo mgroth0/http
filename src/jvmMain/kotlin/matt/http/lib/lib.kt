@@ -3,6 +3,8 @@
 package matt.http.lib
 
 import io.ktor.client.content.LocalFileContent
+import io.ktor.client.engine.HttpClientEngineFactory
+import io.ktor.client.engine.java.Java
 import io.ktor.http.content.OutgoingContent
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.jvm.javaio.copyTo
@@ -31,3 +33,7 @@ class StreamContent(private val stream: InputStream): OutgoingContent.WriteChann
 sealed interface JDuringConnectionWriter: DuringConnectionWriter
 class StreamBodyWriter(val stream: InputStream): JDuringConnectionWriter
 class FileBodyWriter(val file: MFile): JDuringConnectionWriter
+
+actual val httpClientEngine: HttpClientEngineFactory<*> by lazy {
+  Java
+}

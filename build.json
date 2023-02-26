@@ -17,10 +17,21 @@
 	  "type" : "Project",
 	  "cfg" :  "commonMainApi",
 	  "path" : ":k:time"
-	},	{
+	},
+	{
 	  "type" : "Lib",
 	  "cfg" :  "commonMainApi",
-	  "key" : "ktorClientCore"
+	  "key" :  "ktorClientCore"
+	},
+	{
+	  "type" : "Lib",
+	  "cfg" :  "jsMainImplementation",
+	  "key" :  "ktorClientJS"
+	},
+	{
+	  "type" : "Lib",
+	  "cfg" :  "jvmMainApi",
+	  "key" :  "ktorClientJava"
 	}
   ]
 }
