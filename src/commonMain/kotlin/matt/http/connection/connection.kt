@@ -10,6 +10,8 @@ import matt.log.todo.todo
 
 sealed interface HTTPConnectResult
 
+suspend fun HTTPConnectResult.requireSuccessful() = (this as HTTPConnection).requireSuccessful()
+
 abstract class HTTPConnectionProblem(message: String): Exception(message), HTTPConnectResult
 
 class HTTPConnection(private val response: HttpResponse): HTTPConnectResult {
