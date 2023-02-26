@@ -15,7 +15,7 @@ class HTTPRequestAttempt(
 
 sealed class TooMuchRetryingException(attempts: List<HTTPRequestAttempt>):
 	HTTPConnectionProblem(
-	  "No successful connection after $${attempts.size} ${
+	  "No successful connection after ${attempts.size} ${
 		maybePlural(
 		  attempts.size, "attempt"
 		)
