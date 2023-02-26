@@ -4,7 +4,6 @@ import io.ktor.http.content.OutgoingContent
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.jvm.javaio.copyTo
 import matt.http.req.write.DuringConnectionWriter
-import matt.http.req.write.JDuringConnectionWriter
 import matt.lang.anno.SeeURL
 import java.io.InputStream
 
@@ -20,4 +19,12 @@ class StreamContent(private val stream: InputStream): OutgoingContent.WriteChann
 	stream.copyTo(channel, 1024)
   }
 }
+
+
+
+interface JDuringConnectionWriter: DuringConnectionWriter {
+  val stream: InputStream
+}
+class StreamBodyWriter(override val stream: InputStream): JDuringConnectionWriter
+
 
