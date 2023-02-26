@@ -24,6 +24,5 @@ suspend fun FileOrURL.http(
   val snap = req.snapshot()
   val requester = HTTPRequester.DEFAULT
   requester.request = snap
-  val attempt = requester.send()
-  return attempt.awaitConnection()
+  return requester.send()
 }
