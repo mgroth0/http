@@ -12,11 +12,12 @@ sealed class TooMuchRetryingException(numAttempts: Int, triedFor: Duration): HTT
 	)
   } (${triedFor})"
 )
-class TooManyRetrysException(numAttempts: Int, triedFor: Duration): TooMuchRetryingException(numAttempts,triedFor)
-class TriedForTooLongException(numAttempts: Int, triedFor: Duration): TooMuchRetryingException(numAttempts,triedFor)
+
+class TooManyRetrysException(numAttempts: Int, triedFor: Duration): TooMuchRetryingException(numAttempts, triedFor)
+class TriedForTooLongException(numAttempts: Int, triedFor: Duration): TooMuchRetryingException(numAttempts, triedFor)
 
 sealed class NoConnectionException(message: String): HTTPConnectionProblem("No Connection: $message")
-class HTTPConnectionRefused: NoConnectionException("Connection Refused")
+class HTTPExceptionWhileCreatingConnection(cause: Exception): NoConnectionException("Exception while creating connection: ${cause}: ${cause.message}")
 class HTTPTimeoutException(duration: Duration): NoConnectionException("Timeout after $duration")
 sealed class HTTPBadConnectionException(status: Short, message: String): HTTPConnectionProblem("$status: $message")
 class WeirdStatusCodeException(status: Short, message: String): HTTPBadConnectionException(

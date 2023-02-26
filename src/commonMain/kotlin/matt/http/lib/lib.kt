@@ -14,6 +14,7 @@ import io.ktor.util.InternalAPI
 import matt.http.connection.HTTPConnectResult
 import matt.http.connection.HTTPConnection
 import matt.http.method.HTTPMethod
+import matt.http.req.requester.problems.HTTPExceptionWhileCreatingConnection
 import matt.http.req.write.BodyWriter
 import matt.http.req.write.BytesBodyWriter
 import matt.http.req.write.DuringConnectionWriter
@@ -60,8 +61,12 @@ class HTTPRequestBuilder {
   }
 
   suspend fun send(): HTTPConnectResult {
-	val con = client.request(builder)
-	return HTTPConnection(con)
+	return try {
+	  val con = client.request(builder)
+	  HTTPConnection(con)
+	} catch (e: Exception) {
+	  HTTPExceptionWhileCreatingConnection(e)
+	}
   }
 }
 
