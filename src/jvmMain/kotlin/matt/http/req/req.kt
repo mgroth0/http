@@ -1,3 +1,5 @@
+@file:JvmName("ReqJvmKt")
+
 package matt.http.req
 
 import matt.file.MFile
