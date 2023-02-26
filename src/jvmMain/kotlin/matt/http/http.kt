@@ -9,7 +9,11 @@ import java.net.URI
 import java.net.URL
 
 
-suspend fun http(url: URI, op: MutableHTTPRequest.()->Unit = {}) = MURL(url).http(op=op)
+suspend fun http(
+  url: URI,
+  requester: HTTPRequester = HTTPRequester.DEFAULT,
+  op: MutableHTTPRequest.()->Unit = {}
+) = MURL(url).http(op=op,requester=requester)
 
 suspend fun http(
   url: URL,

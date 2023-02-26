@@ -12,8 +12,16 @@ import kotlin.jvm.JvmName
 annotation class HTTPDslMarker
 
 @JvmName("http1")
-suspend fun http(url: FileOrURL, op: MutableHTTPRequest.()->Unit = {}) = url.http(op = op)
-suspend fun http(url: String, op: MutableHTTPRequest.()->Unit = {}) = MURL(url).http(op = op)
+suspend fun http(
+  url: FileOrURL,
+  requester: HTTPRequester = HTTPRequester.DEFAULT,
+  op: MutableHTTPRequest.()->Unit = {}
+) = url.http(op = op,requester=requester)
+suspend fun http(
+  url: String,
+  requester: HTTPRequester = HTTPRequester.DEFAULT,
+  op: MutableHTTPRequest.()->Unit = {}
+) = MURL(url).http(op = op,requester=requester)
 
 suspend fun FileOrURL.http(
   requester: HTTPRequester = HTTPRequester.DEFAULT,
