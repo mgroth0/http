@@ -5,7 +5,6 @@ import io.ktor.client.statement.readBytes
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import matt.log.todo.todo
 
 
 sealed interface HTTPConnectResult
@@ -16,9 +15,6 @@ abstract class HTTPConnectionProblem(message: String): Exception(message), HTTPC
 
 class HTTPConnection(private val response: HttpResponse): HTTPConnectResult {
 
-  init {
-	todo("file.readChannel().efficientlyTransferTo(liveHTTPConnection.outputStream)")
-  }
 
   private var alreadyReadBytes: ByteArray? = null
   private val mutex = Mutex()
@@ -51,6 +47,11 @@ class HTTPConnection(private val response: HttpResponse): HTTPConnectResult {
   suspend fun requireSuccessful(): HTTPConnection {
 	bytes()
 	return this
+  }
+
+  suspend fun print() {
+	println(statusCode())
+	println(text())
   }
 
 }
