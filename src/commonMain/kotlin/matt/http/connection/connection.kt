@@ -1,8 +1,10 @@
 package matt.http.connection
 
 import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsChannel
 import io.ktor.client.statement.readBytes
 import io.ktor.http.HttpStatusCode
+import io.ktor.utils.io.readUTF8Line
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -52,6 +54,15 @@ class HTTPConnection(private val response: HttpResponse): HTTPConnectResult {
   suspend fun print() {
 	println(statusCode())
 	println(text())
+  }
+
+
+  suspend fun consumeLines(op: (String)->Unit) {
+	val channel = response.bodyAsChannel()
+	do {
+	  val nextLine = channel.readUTF8Line()
+	  if (nextLine != null) op(nextLine)
+	} while (nextLine != null)
   }
 
 }
