@@ -3,11 +3,6 @@ package matt.http.url
 import matt.file.FileOrURL
 import matt.file.construct.mFile
 
-fun buildQueryURL(mainURL: String, vararg params: Pair<String, String>) = buildQueryURL(mainURL, params.toMap())
-fun buildQueryURL(mainURL: String, params: Map<String, String>): String {
-  return "$mainURL?${params.entries.joinToString(separator = "&") { "${it.key}=${it.value}" }}"
-}
-
 interface CommonURL: FileOrURL {
 
   override val cpath: String
@@ -29,6 +24,7 @@ fun herokuHostName(
   staging: Boolean
 ) = MURL("https://${baseAppName}${if (staging) "-staging" else ""}.herokuapp.com")
 
+
 expect class MURL(path: String): CommonURL {
 
 
@@ -39,7 +35,10 @@ expect class MURL(path: String): CommonURL {
   override fun toString(): String
 
   suspend fun loadText(): String
+
+
 }
+
 
 val EXAMPLE_MURL by lazy {
   MURL("https://example.com/")

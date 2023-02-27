@@ -1,5 +1,6 @@
 package matt.http.internet
 
+import matt.http.url.MURL
 import matt.lang.not
 import matt.model.code.valjson.ValJson.Port
 
@@ -21,4 +22,4 @@ fun TheInternet.isNotAvailable() = not(isAvailable())
 
 
 /*not https*/
-val LOCAL_TEST_URL = "http://0.0.0.0:${Port.localKtorTest}"
+val LOCAL_TEST_URL = MURL("http://0.0.0.0:${Port.localKtorTest}")
