@@ -24,13 +24,16 @@ class HTTPHeaders internal constructor(private val con: MutableHTTPRequest) {
 	varProp(
 	  getter = { con.valueForHeader(key) },
 	  setter = {
-		require(con.valueForHeader(key) == null) {
-		  "unclear if I am adding or setting here"
+		val oldValue = con.valueForHeader(key)
+		require(oldValue == null || oldValue == it) {
+		  "unclear if I am adding or setting here (oldValue=$oldValue,newValue=$it)"
 		}
 		require(it != null) {
 		  "not sure how to handle this yet"
 		}
-		con.addHeader(key, it)
+		if (oldValue != it) {
+		  con.addHeader(key, it)
+		}
 	  }
 	)
   }
@@ -42,18 +45,19 @@ class HTTPHeaders internal constructor(private val con: MutableHTTPRequest) {
 		s?.let { converter.fromString(s) }
 	  },
 	  setter = {
-
-		require(con.valueForHeader(key) == null) {
-		  "unclear if I am adding or setting here"
+		val oldValue = con.valueForHeader(key)
+		val oldValueConverted = oldValue?.let { converter.fromString(it) }
+		require(oldValue == null || oldValueConverted == it) {
+		  "unclear if I am adding or setting here (oldValue=$oldValue,newValue=$it)"
 		}
 		require(it != null) {
 		  "not sure how to handle this yet"
 		}
-
-		con.addHeader(key, it.let { itNonNull ->
-		  converter.toString(itNonNull)
-		})
-
+		if (oldValueConverted != it) {
+		  con.addHeader(key, it.let { itNonNull ->
+			converter.toString(itNonNull)
+		  })
+		}
 	  }
 	)
   }

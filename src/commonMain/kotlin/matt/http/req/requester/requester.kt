@@ -9,8 +9,10 @@ import matt.http.req.HTTPRequest
 import matt.http.req.ImmutableHTTPRequest
 import matt.http.req.requester.problems.ClientErrorException
 import matt.http.req.requester.problems.HTTPRequestAttempt
+import matt.http.req.requester.problems.NoConnectionException
 import matt.http.req.requester.problems.RedirectionException
 import matt.http.req.requester.problems.ServerErrorException
+import matt.http.req.requester.problems.ServiceUnavailableException
 import matt.http.req.requester.problems.TooManyRetrysException
 import matt.http.req.requester.problems.TriedForTooLongException
 import matt.http.req.requester.problems.UnauthorizedException
@@ -19,6 +21,8 @@ import matt.lang.anno.SeeURL
 import matt.time.UnixTime
 import matt.time.dur.isNotZero
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 data class HTTPRequester(
   val request: ImmutableHTTPRequest = HTTPRequest.EXAMPLE,
@@ -38,6 +42,16 @@ data class HTTPRequester(
 	val DEFAULT by lazy {
 	  HTTPRequester()
 	}
+	val DEFAULT_RETRYER by lazy {
+	  DEFAULT.copy(
+		numAttempts = 10,
+		keepTryingFor = 1.seconds,
+		interAttemptWait = 100.milliseconds,
+		retryOn = {
+		  it is NoConnectionException
+		}
+	  )
+	}
   }
 
 
@@ -52,7 +66,11 @@ data class HTTPRequester(
 			else -> ClientErrorException(statusCode, it.text())
 		  }
 
-		  in 500..599  -> ServerErrorException(statusCode, it.text())
+		  in 500..599  -> when (statusCode.toInt()) {
+			503  -> ServiceUnavailableException(it.text())
+			else -> ServerErrorException(statusCode, it.text())
+		  }
+
 		  !in 100..300 -> WeirdStatusCodeException(statusCode, it.text())
 		  else         -> it
 		}

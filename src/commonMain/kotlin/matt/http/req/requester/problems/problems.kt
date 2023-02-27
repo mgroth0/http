@@ -42,4 +42,5 @@ class RedirectionException(status: Short, message: String): HTTPBadConnectionExc
 sealed class HTTPErrorException(status: Short, message: String): HTTPBadConnectionException(status, message)
 open class ClientErrorException(status: Short, message: String): HTTPErrorException(status, message)
 class UnauthorizedException(message: String): ClientErrorException(401, message)
-class ServerErrorException(status: Short, message: String): HTTPErrorException(status, message)
+open class ServerErrorException(status: Short, message: String): HTTPErrorException(status, message)
+class ServiceUnavailableException(message: String): ServerErrorException(401, message)

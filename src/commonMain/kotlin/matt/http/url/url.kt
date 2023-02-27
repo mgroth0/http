@@ -17,6 +17,18 @@ interface CommonURL: FileOrURL {
   }
 }
 
+class HerokuSite(
+  baseAppName: String
+) {
+  val stagingHost = herokuHostName(baseAppName = baseAppName, staging = true)
+  val productionHost = herokuHostName(baseAppName = baseAppName, staging = false)
+}
+
+fun herokuHostName(
+  baseAppName: String,
+  staging: Boolean
+) = MURL("https://${baseAppName}${if (staging) "-staging" else ""}.herokuapp.com")
+
 expect class MURL(path: String): CommonURL {
 
 
