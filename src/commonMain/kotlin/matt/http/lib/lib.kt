@@ -1,6 +1,6 @@
 package matt.http.lib
 
-import io.ktor.client.engine.HttpClientEngineFactory
+import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.headers
@@ -22,13 +22,26 @@ import matt.http.req.write.NoBody
 import matt.lang.go
 import kotlin.time.Duration
 
-expect val httpClientEngine: HttpClientEngineFactory<*>
+expect val httpClientEngine: HttpClientEngine
 
 @OptIn(InternalAPI::class)
 class HTTPRequestBuilder {
 
   companion object {
-	private val client = io.ktor.client.HttpClient(httpClientEngine)
+	private val client = io.ktor.client.HttpClient(httpClientEngine) {
+/*	  this.engine {
+		this.lo
+	  }
+	  this.l
+	  this.logging {
+
+	  }
+	  install(Logging) {
+		level = LogLevel.NONE
+		logger = Logger.EMPTY
+		this
+	  }*/
+	}
   }
 
   var builder = HttpRequestBuilder()
