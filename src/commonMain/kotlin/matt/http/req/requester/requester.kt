@@ -44,8 +44,8 @@ data class HTTPRequester(
 	}
 	val DEFAULT_RETRYER by lazy {
 	  DEFAULT.copy(
-		numAttempts = 10,
-		keepTryingFor = 1.seconds,
+		numAttempts = 100,
+		keepTryingFor = 5.seconds,
 		interAttemptWait = 100.milliseconds,
 		retryOn = {
 		  it is NoConnectionException
