@@ -94,7 +94,8 @@ data class HTTPRequester(
 	  attempts += HTTPRequestAttempt(tSent = tSent, tGotResult = tGotResult, result = attempt)
 	  if (retryOn(attempt)) Unit/*do nothing*/
 	  else {
-		return checkConnection(attempt)
+		val checked = checkConnection(attempt)
+		if (!retryOn(checked)) return checked
 	  }
 	  if (
 		attemptNum < (numAttempts - 1)

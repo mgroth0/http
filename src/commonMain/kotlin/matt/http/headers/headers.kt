@@ -18,7 +18,7 @@ class HTTPHeaders internal constructor(private val con: MutableHTTPRequest) {
 
   var contentType: HTTPMediaType? by propProvider("Content-Type", HTTPContentTypeConverter)
   var accept: HTTPMediaType? by propProvider("Accept", HTTPContentTypeConverter)
-  var auth: Auth? by propProvider("Authorization", BearerConverter)
+  var auth: AuthHeader? by propProvider("Authorization", BearerConverter)
 
   private fun propProvider(key: String) = provider {
 	varProp(
@@ -92,24 +92,27 @@ object HTTPContentTypeConverter: StringConverter<HTTPMediaType> {
 }
 
 
+
+
+
+object BearerConverter: StringConverter<AuthHeader> {
+  override fun toString(t: AuthHeader): String {
+	return arrayOf(t.authType.name, t.token).joinWithSpaces()
+  }
+
+  override fun fromString(s: String): AuthHeader {
+	return AuthHeader(authType = AuthType.valueOf(s.substringBefore(' ').trim()), token = s.substringAfter(' ').trim())
+  }
+
+}
+
+
+
 enum class AuthType {
   Bearer, Token
 }
 
-data class Auth(
+data class AuthHeader(
   val authType: AuthType,
   val token: String
 )
-
-
-object BearerConverter: StringConverter<Auth> {
-  override fun toString(t: Auth): String {
-	return arrayOf(t.authType.name, t.token).joinWithSpaces()
-  }
-
-  override fun fromString(s: String): Auth {
-	return Auth(authType = AuthType.valueOf(s.substringBefore(' ').trim()), token = s.substringAfter(' ').trim())
-  }
-
-}
-

@@ -1,6 +1,7 @@
 package matt.http.lib
 
 import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.headers
@@ -29,18 +30,21 @@ class HTTPRequestBuilder {
 
   companion object {
 	private val client = io.ktor.client.HttpClient(httpClientEngine) {
-/*	  this.engine {
-		this.lo
-	  }
-	  this.l
-	  this.logging {
 
-	  }
-	  install(Logging) {
-		level = LogLevel.NONE
-		logger = Logger.EMPTY
-		this
-	  }*/
+	  install(HttpTimeout)
+
+	  /*	  this.engine {
+			  this.lo
+			}
+			this.l
+			this.logging {
+
+			}
+			install(Logging) {
+			  level = LogLevel.NONE
+			  logger = Logger.EMPTY
+			  this
+			}*/
 	}
   }
 
