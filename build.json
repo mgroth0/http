@@ -32,6 +32,11 @@
 	  "type" : "Lib",
 	  "cfg" :  "jvmMainApi",
 	  "key" :  "ktorClientJava"
+	},
+	{
+	  "type" : "Project",
+	  "cfg" :  "commonMainApi",
+	  "path" : ":k:json"
 	}
   ]
 }

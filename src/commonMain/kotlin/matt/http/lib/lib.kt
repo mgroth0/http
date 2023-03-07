@@ -52,6 +52,9 @@ class HTTPRequestBuilder {
 
 
   fun initialize(url: String, method: HTTPMethod, bodyWriter: BodyWriter) {
+
+
+
 	builder.url(url)
 	builder.method
 	builder.method = HttpMethod(method.name)

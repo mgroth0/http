@@ -60,7 +60,10 @@ data class HTTPRequester(
 	when (it) {
 	  is HTTPConnection -> {
 		when (val statusCode = it.statusCode().value.toShort()) {
-		  in 300..399  -> RedirectionException(statusCode, it.text())
+		  in 300..399  -> {
+			RedirectionException(statusCode, it.text())
+		  }
+
 		  in 400..499  -> when (statusCode.toInt()) {
 			401  -> UnauthorizedException(it.text())
 			else -> ClientErrorException(statusCode, it.text())
