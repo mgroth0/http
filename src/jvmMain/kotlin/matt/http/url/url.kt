@@ -1,7 +1,9 @@
 package matt.http.url
 
+import matt.file.MFile
 import matt.file.URLLike
 import matt.http.http
+import matt.prim.str.ensureSuffix
 import java.awt.Desktop
 import java.net.URI
 import java.net.URL
@@ -26,7 +28,7 @@ actual class MURL actual constructor(path: String): CommonURL, URLLike {
   operator fun get(other: String) = resolve(other)
   actual override fun resolve(other: String): MURL {
 	/*the java way is weird and discards a segment*/
-	return MURL(cpath.removeSuffix("/") + "/" + other.removePrefix("/"))
+	return MURL(cpath.ensureSuffix(MFile.separator) + other.removePrefix(MFile.separator))
 	/*return MURL(jURL.toURI().resolve(other).toString())*/
   }
 
