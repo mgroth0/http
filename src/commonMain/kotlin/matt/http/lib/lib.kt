@@ -56,7 +56,6 @@ class HTTPRequestBuilder {
 
 
 	builder.url(url)
-	builder.method
 	builder.method = HttpMethod(method.name)
 	builder.body = figureOutContentWriter(bodyWriter)
   }

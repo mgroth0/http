@@ -122,7 +122,9 @@ data class HTTPRequester(
 
   private suspend fun sendFromLib(timeout: Duration? = null) = HTTPRequestBuilder().apply {
 	initialize(
-	  url = request.url, method = request.method, bodyWriter = request.bodyWriter
+	  url = request.url,
+	  method = request.method,
+	  bodyWriter = request.bodyWriter
 	)
 	applyHeaders(request.headersSnapshot())
 	applyTimeout(timeout)
