@@ -37,6 +37,12 @@
 	  "type" : "Project",
 	  "cfg" :  "commonMainApi",
 	  "path" : ":k:json"
+	},
+	{
+	  "type" : "Lib",
+	  "cfg" :  "commonMainApi",
+	  "key" :  "atomicfu",
+	  "note" : "https://github.com/Kotlin/kotlinx.coroutines/issues/3305#issuecomment-1141239424"
 	}
   ]
 }
