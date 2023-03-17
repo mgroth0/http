@@ -10,6 +10,7 @@ import matt.http.req.ImmutableHTTPRequest
 import matt.http.req.requester.problems.ClientErrorException
 import matt.http.req.requester.problems.HTTPRequestAttempt
 import matt.http.req.requester.problems.NoConnectionException
+import matt.http.req.requester.problems.NotFoundException
 import matt.http.req.requester.problems.RedirectionException
 import matt.http.req.requester.problems.ServerErrorException
 import matt.http.req.requester.problems.ServiceUnavailableException
@@ -66,6 +67,7 @@ data class HTTPRequester(
 
 		  in 400..499  -> when (statusCode.toInt()) {
 			401  -> UnauthorizedException(it.text())
+			404  -> NotFoundException(request.url)
 			else -> ClientErrorException(statusCode, it.text())
 		  }
 

@@ -41,6 +41,7 @@ class WeirdStatusCodeException(status: Short, message: String): HTTPBadConnectio
 class RedirectionException(status: Short, message: String): HTTPBadConnectionException(status, message)
 sealed class HTTPErrorException(status: Short, message: String): HTTPBadConnectionException(status, message)
 open class ClientErrorException(status: Short, message: String): HTTPErrorException(status, message)
+class NotFoundException(url: String): ClientErrorException(404, "Not Found: $url")
 class UnauthorizedException(message: String): ClientErrorException(401, message)
 open class ServerErrorException(status: Short, message: String): HTTPErrorException(status, message)
 class ServiceUnavailableException(message: String): ServerErrorException(401, message)
