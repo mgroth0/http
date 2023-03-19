@@ -6,6 +6,7 @@ import matt.http.req.valueForHeader
 import matt.lang.delegation.provider
 import matt.lang.delegation.varProp
 import matt.model.op.convert.StringConverter
+import matt.model.op.convert.StringStringConverter
 import matt.prim.str.joinWithSpaces
 
 fun MutableHTTPRequest.headers(op: HTTPHeaders.()->Unit) {
@@ -19,21 +20,37 @@ class HTTPHeaders internal constructor(private val con: MutableHTTPRequest) {
   var contentType: HTTPMediaType? by propProvider("Content-Type", HTTPContentTypeConverter)
   var accept: HTTPMediaType? by propProvider("Accept", HTTPContentTypeConverter)
   var auth: AuthHeader? by propProvider("Authorization", BearerConverter)
+  fun setMySpecialBearerAuth(name: String, token: AuthHeader) {
+	addHeader("Authorization-$name", token, BearerConverter)
+  }
+
+
+  private fun <T> validateHeaderIsAbsentOrHasValue(header: String, value: T, converter: StringConverter<T>): T? {
+	val oldValue = con.valueForHeader(header)
+	val oldValueConverted = oldValue?.let { converter.fromString(it) }
+	require(oldValue == null || oldValueConverted == value) {
+	  "unclear if I am adding or setting here (oldValue=$oldValue,newValue=$value)"
+	}
+	return oldValueConverted
+  }
+
+  private fun <T> addHeader(key: String, value: T, converter: StringConverter<T>) {
+	val oldValueConverted = validateHeaderIsAbsentOrHasValue(key, value, converter)
+	if (oldValueConverted != value) {
+	  con.addHeader(key, converter.toString(value))
+	}
+  }
+
+  private fun addHeader(key: String, value: String) = addHeader(key, value, StringStringConverter)
 
   private fun propProvider(key: String) = provider {
 	varProp(
 	  getter = { con.valueForHeader(key) },
 	  setter = {
-		val oldValue = con.valueForHeader(key)
-		require(oldValue == null || oldValue == it) {
-		  "unclear if I am adding or setting here (oldValue=$oldValue,newValue=$it)"
-		}
 		require(it != null) {
 		  "not sure how to handle this yet"
 		}
-		if (oldValue != it) {
-		  con.addHeader(key, it)
-		}
+		addHeader(key, it)
 	  }
 	)
   }
@@ -45,19 +62,10 @@ class HTTPHeaders internal constructor(private val con: MutableHTTPRequest) {
 		s?.let { converter.fromString(s) }
 	  },
 	  setter = {
-		val oldValue = con.valueForHeader(key)
-		val oldValueConverted = oldValue?.let { converter.fromString(it) }
-		require(oldValue == null || oldValueConverted == it) {
-		  "unclear if I am adding or setting here (oldValue=$oldValue,newValue=$it)"
-		}
 		require(it != null) {
 		  "not sure how to handle this yet"
 		}
-		if (oldValueConverted != it) {
-		  con.addHeader(key, it.let { itNonNull ->
-			converter.toString(itNonNull)
-		  })
-		}
+		addHeader(key, it, converter)
 	  }
 	)
   }
@@ -92,9 +100,6 @@ object HTTPContentTypeConverter: StringConverter<HTTPMediaType> {
 }
 
 
-
-
-
 object BearerConverter: StringConverter<AuthHeader> {
   override fun toString(t: AuthHeader): String {
 	return arrayOf(t.authType.name, t.token).joinWithSpaces()
@@ -105,7 +110,6 @@ object BearerConverter: StringConverter<AuthHeader> {
   }
 
 }
-
 
 
 enum class AuthType {
