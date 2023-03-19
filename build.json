@@ -40,7 +40,7 @@
 	},
 	{
 	  "type" : "Lib",
-	  "cfg" :  "commonMainApi",
+	  "cfg" :  "jsMainImplementation",
 	  "key" :  "atomicfu",
 	  "note" : "https://github.com/Kotlin/kotlinx.coroutines/issues/3305#issuecomment-1141239424"
 	}
