@@ -8,20 +8,26 @@ import matt.http.req.MutableHTTPRequest
 import matt.http.url.MURL
 
 interface API {
-  suspend fun http(url: String, op: MutableHTTPRequest.()->Unit = {}): HTTPConnection
+    suspend fun http(
+        url: String,
+        op: MutableHTTPRequest.() -> Unit = {}
+    ): HTTPConnection
 }
 
-open class APIImpl(
-  val urlPrefix: MURL
-): API {
+interface APIWithConfiguredHeaders : API {
 
-  open val defaultHeaders: (HTTPHeaders.()->Unit)? = null
+    val urlPrefix: MURL
 
-  override suspend fun http(url: String, op: MutableHTTPRequest.()->Unit) = urlPrefix.resolve(url).http {
-	headers {
-	  defaultHeaders?.invoke(this)
-	}
-	op()
-  }
+    open val defaultHeaders: (HTTPHeaders.() -> Unit)? get() = null
+
+    override suspend fun http(
+        url: String,
+        op: MutableHTTPRequest.() -> Unit
+    ) = urlPrefix.resolve(url).http {
+        headers {
+            defaultHeaders?.invoke(this)
+        }
+        op()
+    }
 
 }
