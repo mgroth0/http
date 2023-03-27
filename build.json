@@ -1,48 +1,55 @@
 {
-  "type" :         "matt.mstruct.bj.MultiPlatformModule",
-  "jvm" :          {},
-  "js" :           "LIB",
-  "dependencies" : [
-	{
-	  "type" : "Lib",
-	  "cfg" :  "commonMainApi",
-	  "key" :  "kt-stdlib"
-	},
-	{
-	  "type" : "Project",
-	  "cfg" :  "commonMainApi",
-	  "path" : ":k:file"
-	},
-	{
-	  "type" : "Project",
-	  "cfg" :  "commonMainApi",
-	  "path" : ":k:time"
-	},
-	{
-	  "type" : "Lib",
-	  "cfg" :  "commonMainApi",
-	  "key" :  "ktorClientCore"
-	},
-	{
-	  "type" : "Lib",
-	  "cfg" :  "jsMainImplementation",
-	  "key" :  "ktorClientJS"
-	},
-	{
-	  "type" : "Lib",
-	  "cfg" :  "jvmMainApi",
-	  "key" :  "ktorClientJava"
-	},
-	{
-	  "type" : "Project",
-	  "cfg" :  "commonMainApi",
-	  "path" : ":k:json"
-	},
-	{
-	  "type" : "Lib",
-	  "cfg" :  "jsMainImplementation",
-	  "key" :  "atomicfu-runtime",
-	  "note" : "https://github.com/Kotlin/kotlinx.coroutines/issues/3305#issuecomment-1141239424"
-	}
+  "type": "matt.mstruct.bj.MultiPlatformModule",
+  "jvm": {},
+  "js": "LIB",
+  "android": {
+    "type": "Lib"
+  },
+  "dependencies": [
+    {
+      "type": "Lib",
+      "cfg": "commonMainApi",
+      "key": "kt-stdlib"
+    },
+    {
+      "type": "Project",
+      "cfg": "commonMainApi",
+      "path": ":k:file"
+    },
+    {
+      "type": "Project",
+      "cfg": "commonMainApi",
+      "path": ":k:time"
+    },
+    {
+      "type": "Lib",
+      "cfg": "commonMainApi",
+      "key": "ktorClientCore"
+    },
+    {
+      "type": "Lib",
+      "cfg": "jsMainImplementation",
+      "key": "ktorClientJS"
+    },
+    {
+      "type": "Lib",
+      "cfg": "jvmMainApi",
+      "key": "ktorClientJava"
+    },
+    {
+      "type": "Project",
+      "cfg": "commonMainApi",
+      "path": ":k:json"
+    },
+    {
+      "type": "Lib",
+      "cfg": "jsMainImplementation",
+      "key": "atomicfu-runtime",
+      "note": "https://github.com/Kotlin/kotlinx.coroutines/issues/3305#issuecomment-1141239424"
+    },   {
+      "type": "Lib",
+      "cfg": "debugImplementation",
+      "key": "ktorClientAndroid"
+    }
   ]
 }

@@ -43,7 +43,8 @@ class HTTPHeaders internal constructor(private val con: MutableHTTPRequest) {
 
   private fun addHeader(key: String, value: String) = addHeader(key, value, StringStringConverter)
 
-  private fun propProvider(key: String) = provider {
+	/*only commenting this out because it is unused and I'm dealing with JDK 1.8 inline issues*/
+  /*private fun propProvider(key: String) = provider {
 	varProp(
 	  getter = { con.valueForHeader(key) },
 	  setter = {
@@ -53,7 +54,7 @@ class HTTPHeaders internal constructor(private val con: MutableHTTPRequest) {
 		addHeader(key, it)
 	  }
 	)
-  }
+  }*/
 
   private fun <T> propProvider(key: String, converter: StringConverter<T & Any>) = provider {
 	varProp(
