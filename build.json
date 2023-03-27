@@ -48,7 +48,7 @@
       "note": "https://github.com/Kotlin/kotlinx.coroutines/issues/3305#issuecomment-1141239424"
     },   {
       "type": "Lib",
-      "cfg": "debugImplementation",
+      "cfg": "androidMainImplementation",
       "key": "ktorClientAndroid"
     }
   ]
