@@ -7,11 +7,10 @@ import matt.prim.str.ensureSuffix
 import java.net.URI
 import java.net.URL
 
-actual class MURL actual constructor(path: String): CommonURL, URLLike {
+actual class MURL actual constructor(path: String) : CommonURL, URLLike {
 
-
-    constructor(uri: URI): this(uri.toString())
-    constructor(url: URL): this(url.toString())
+    constructor(uri: URI) : this(uri.toString())
+    constructor(url: URL) : this(url.toString())
 
     override val cpath = path
 
@@ -21,7 +20,7 @@ actual class MURL actual constructor(path: String): CommonURL, URLLike {
 
     val jURL: URL by lazy { toJavaURI().toURL() }
 
-    actual val protocol: String = jURL.protocol
+    actual val protocol: String by lazy { jURL.protocol }
 
     operator fun get(other: String) = resolve(other)
     actual override fun resolve(other: String): MURL {
