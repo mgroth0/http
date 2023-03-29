@@ -19,7 +19,7 @@ actual class MURL actual constructor(path: String): CommonURL, URLLike {
         return URI(cpath)
     }
 
-    val jURL: URL = toJavaURI().toURL()
+    val jURL: URL by lazy { toJavaURI().toURL() }
 
     actual val protocol: String = jURL.protocol
 
