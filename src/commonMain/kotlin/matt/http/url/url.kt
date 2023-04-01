@@ -31,6 +31,7 @@ expect class MURL(path: String): CommonURL {
 
   val protocol: String
 
+
   override fun resolve(other: String): MURL
 
   override fun toString(): String
