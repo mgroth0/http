@@ -45,6 +45,11 @@
       "type": "Lib",
       "cfg": "androidMainImplementation",
       "key": "ktorClientAndroid"
+    },
+    {
+      "type": "Project",
+      "cfg": "jvmTestImplementation",
+      "path": ":k:test"
     }
   ]
 }
