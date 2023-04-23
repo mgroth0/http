@@ -44,10 +44,14 @@ value class ValidatingHTTPURL(override val url: String) : ValidHTTPURL {
         /*original regex by ChatGPT did not allow parenthesis*/
         private const val ALLOW_PARENTHESIS = true
 
+        /*original regex by ChatGPT did not allow hashes*/
+        @SeeURL("https://github.com/Kotlin/kotlinx.coroutines/blob/master/docs/topics/debugging.md#stacktrace-recovery")
+        private const val ALLOW_HASHES = true
+
         @SupportedByChatGPT
         private val REGEX = Regex(
             pattern =
-            """^https?://(?:[-\w.]|%[\da-fA-F]{2})+/(?:[-\w./${if (ALLOW_PARENTHESIS) "()" else ""}?%&=]*)?$"""
+            """^https?://(?:[-\w.]|%[\da-fA-F]{2})+/(?:[-\w./${if (ALLOW_PARENTHESIS) "()" else ""}${if (ALLOW_HASHES) "#" else ""}?%&=]*)?$"""
         )
     }
 

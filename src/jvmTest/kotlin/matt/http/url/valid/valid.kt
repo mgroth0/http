@@ -57,6 +57,11 @@ class ValidURLTests {
         ValidatingHTTPURL("https://www.wikiwand.com/en/Shim_(computing)")
     }
 
+    @Test
+    fun hashesAreValid() {
+        ValidatingHTTPURL("https://github.com/Kotlin/kotlinx.coroutines/blob/master/docs/topics/debugging.md#stacktrace-recovery")
+    }
+
 
     @Test
     fun googleIsValid() {
