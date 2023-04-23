@@ -48,6 +48,7 @@ value class ValidatingHTTPURL(override val url: String) : ValidHTTPURL {
         @SeeURL("https://github.com/Kotlin/kotlinx.coroutines/blob/master/docs/topics/debugging.md#stacktrace-recovery")
         private const val ALLOW_HASHES = true
 
+        /*todo: regex DSL*/
         @SupportedByChatGPT
         private val REGEX = Regex(
             pattern =
