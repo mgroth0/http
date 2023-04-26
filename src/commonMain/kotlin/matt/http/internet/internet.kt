@@ -5,19 +5,24 @@ import matt.lang.not
 import matt.model.code.valjson.ValJson.Port
 
 class TheInternet {
-  //  val wasNotAvailableInThisRuntime get() = not(wasAvailableInThisRuntime)
+//    val wasAvailableInThisRuntime by lazy {
+//        isAvailable()
+//    }
+//    val wasNotAvailableInThisRuntime get() = not(wasAvailableInThisRuntime)
 
-  //  fun isAvailable(): Boolean
-  /*ugh, won't work with gradle daemon. There has to be a way to set properties that are reset for the gradle daemon*/
-  val wasAvailableInThisRuntime by lazy {
-	isAvailable()
-  }
-  val wasNotAvailableInThisRuntime get() = not(wasAvailableInThisRuntime)
+
+    private var gotAReport = false
+    fun reportUnavailability() {
+        gotAReport = true
+    }
+
+    val wasAlwaysAvailableInThisRuntime get() = !gotAReport
+    val wasUnavilableThisRuntime get() = gotAReport
+
 
 }
 
 expect fun TheInternet.isAvailable(): Boolean
-
 fun TheInternet.isNotAvailable() = not(isAvailable())
 
 
