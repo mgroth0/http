@@ -25,7 +25,7 @@ actual class MURL actual constructor(path: String) : CommonURL, URLLike {
     operator fun get(other: String) = resolve(other)
     actual override fun resolve(other: String): MURL {
         /*the java way is weird and discards a segment*/
-        return MURL(cpath.ensureSuffix(MFile.separator) + other.removePrefix(MFile.separator))
+        return MURL(cpath.ensureSuffix(MFile.unixSeperator) + other.removePrefix(MFile.unixSeperator))
         /*return MURL(jURL.toURI().resolve(other).toString())*/
     }
 
