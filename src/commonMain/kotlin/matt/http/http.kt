@@ -13,25 +13,26 @@ annotation class HTTPDslMarker
 
 @JvmName("http1")
 suspend fun http(
-  url: FileOrURL,
-  requester: HTTPRequester = HTTPRequester.DEFAULT,
-  op: MutableHTTPRequest.()->Unit = {}
-) = url.http(op = op,requester=requester)
+    url: FileOrURL,
+    requester: HTTPRequester = HTTPRequester.DEFAULT,
+    op: MutableHTTPRequest.() -> Unit = {}
+) = url.http(op = op, requester = requester)
+
 suspend fun http(
-  url: String,
-  requester: HTTPRequester = HTTPRequester.DEFAULT,
-  op: MutableHTTPRequest.()->Unit = {}
-) = MURL(url).http(op = op,requester=requester)
+    url: String,
+    requester: HTTPRequester = HTTPRequester.DEFAULT,
+    op: MutableHTTPRequest.() -> Unit = {}
+) = MURL(url).http(op = op, requester = requester)
 
 suspend fun FileOrURL.http(
-  requester: HTTPRequester = HTTPRequester.DEFAULT,
-  op: MutableHTTPRequest.()->Unit = {},
+    requester: HTTPRequester = HTTPRequester.DEFAULT,
+    op: MutableHTTPRequest.() -> Unit = {},
 ): HTTPConnection {
-  val req = MutableHTTPRequest()
-  req.url = this.cpath
-  req.op()
-  val snap = req.snapshot()
-  return requester.copy(request = snap).sendAndThrowUnlessConnectedCorrectly()
+    val req = MutableHTTPRequest()
+    req.url = this.cpath
+    req.op()
+    val snap = req.snapshot()
+    return requester.copy(request = snap).sendAndThrowUnlessConnectedCorrectly()
 }
 
 

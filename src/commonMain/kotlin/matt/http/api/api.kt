@@ -18,7 +18,7 @@ interface APIWithConfiguredHeaders : API {
 
     val urlPrefix: MURL
 
-    open val defaultHeaders: (HTTPHeaders.() -> Unit)? get() = null
+    val defaultHeaders: (HTTPHeaders.() -> Unit)? get() = null
 
     override suspend fun http(
         url: String,

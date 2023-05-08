@@ -93,8 +93,8 @@ class HTTPRequestBuilder {
 
 fun figureOutContentWriter(bodyWriter: BodyWriter): OutgoingContent {
     return when (bodyWriter) {
-        NoBody -> EmptyContent
-        is BytesBodyWriter -> ByteArrayContent(bodyWriter.bytes)
+        NoBody                    -> EmptyContent
+        is BytesBodyWriter        -> ByteArrayContent(bodyWriter.bytes)
         is DuringConnectionWriter -> figureOutLiveContentWriter(bodyWriter)
     }
 }
