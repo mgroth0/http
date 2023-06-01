@@ -8,7 +8,8 @@ import org.junit.jupiter.api.assertThrows
 class ValidURLTests {
 
     companion object {
-        private const val GOOGLE = "https://www.google.com/"
+        internal const val GOOGLE = "https://www.google.com/"
+
     }
 
     @Test

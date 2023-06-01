@@ -15,7 +15,12 @@ import matt.http.req.write.BodyWriter
 import matt.http.req.write.BytesBodyWriter
 import matt.http.req.write.DuringConnectionWriter
 import matt.http.req.write.NoBody
+import matt.lang.anno.SeeURL
 import kotlin.time.Duration
+
+val REQUIRES_COOKIES = listOf(
+    "twitter.com"
+)
 
 expect val httpClientEngine: HttpClientEngine
 
@@ -24,6 +29,11 @@ class HTTPRequestBuilder {
 
     companion object {
         private val client = io.ktor.client.HttpClient(httpClientEngine) {
+
+//            this.defaultRequest {
+//                this.max
+//            }
+
 
             install(HttpTimeout)
 
@@ -50,8 +60,11 @@ class HTTPRequestBuilder {
         method: HTTPMethod,
         bodyWriter: BodyWriter
     ) {
-
-
+        if (REQUIRES_COOKIES.any { it in url }) {
+            @SeeURL("https://webmasters.stackexchange.com/a/74509")
+            @SeeURL("https://github.com/ktorio/ktor/blob/e632bf5a943d44e1fb009bca8c5aa35d19bd6059/ktor-client/ktor-client-core/common/src/io/ktor/client/plugins/HttpSend.kt#L132")
+            throw (RequiresCookiesException(url))
+        }
         builder.url(url)
         builder.method = HttpMethod(method.name)
         builder.body = figureOutContentWriter(bodyWriter)
@@ -100,3 +113,8 @@ fun figureOutContentWriter(bodyWriter: BodyWriter): OutgoingContent {
 }
 
 expect fun figureOutLiveContentWriter(bodyWriter: DuringConnectionWriter): OutgoingContent
+
+@SeeURL("https://webmasters.stackexchange.com/a/74509")
+@SeeURL("https://github.com/ktorio/ktor/blob/e632bf5a943d44e1fb009bca8c5aa35d19bd6059/ktor-client/ktor-client-core/common/src/io/ktor/client/plugins/HttpSend.kt#L132")
+class RequiresCookiesException(url: String) :
+    Exception("I think $url keeps redirecting until it sees that you \"set cookies\"")

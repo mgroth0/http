@@ -50,6 +50,16 @@
       "type": "Project",
       "cfg": "jvmTestImplementation",
       "path": ":k:test"
+    },
+    {
+      "type": "Lib",
+      "cfg": "jvmTestImplementation",
+      "key": "kotlinx-coroutines-test"
+    },
+    {
+      "type": "Lib",
+      "cfg": "jvmTestImplementation",
+      "key": "slf4j-nop"
     }
   ]
 }
