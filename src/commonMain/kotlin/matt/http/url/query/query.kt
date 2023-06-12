@@ -1,8 +1,15 @@
 package matt.http.url.query
 
+import matt.collect.map.filterOutNullValues
 import matt.http.url.MURL
+import matt.lang.delegation.provider
+import matt.lang.delegation.varProp
+
+
+infix fun MURL.query(params: QueryParams): MURL = query(params.toMap())
 
 infix fun MURL.query(params: Map<String, String>) = withQueryParams(params)
+infix fun MURL.withQueryParams(params: QueryParams): MURL = query(params.toMap())
 infix fun MURL.withQueryParams(params: Map<String, String>): MURL {
     return MURL(buildQueryURL(cpath, params))
 }
@@ -23,4 +30,28 @@ fun MURL.withPort(port: Int): MURL {
         error("not ready if already has port")
     }
     return MURL(cpath.substringBefore("/") + ":" + port.toString() + "/" + cpath.substringAfter("/"))
+}
+
+
+abstract class QueryParams {
+
+    internal val params = mutableListOf<Param>()
+
+    internal inner class Param(val name: String) {
+        var value: String? = null
+    }
+
+    fun param() = provider {
+        val p = Param(it)
+        params += p
+        varProp(
+            getter = { p.value },
+            setter = { p.value = it }
+        )
+    }
+
+
+    fun toMap() = params.associate { it.name to it.value }.filterOutNullValues()
+
+
 }
