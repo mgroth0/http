@@ -11,17 +11,17 @@ infix fun MURL.query(params: QueryParams): MURL = query(params.toMap())
 infix fun MURL.query(params: Map<String, String>) = withQueryParams(params)
 infix fun MURL.withQueryParams(params: QueryParams): MURL = query(params.toMap())
 infix fun MURL.withQueryParams(params: Map<String, String>): MURL {
-    return MURL(buildQueryURL(cpath, params))
+    return buildQueryURL(cpath, params)
 }
 
 fun buildQueryURL(mainURL: String, vararg params: Pair<String, String>) = buildQueryURL(mainURL, params.toMap())
-fun buildQueryURL(mainURL: String, params: Map<String, String>): String {
-    return "$mainURL${
+fun buildQueryURL(mainURL: String, params: Map<String, String>): MURL {
+    return MURL("$mainURL${
         params.entries.joinToString(
             separator = "&",
             prefix = if ("?" in mainURL) "&" else "?"
         ) { "${it.key}=${it.value}" }
-    }"
+    }")
 }
 
 
@@ -35,9 +35,9 @@ fun MURL.withPort(port: Int): MURL {
 
 abstract class QueryParams {
 
-    internal val params = mutableListOf<Param>()
+    val params = mutableListOf<Param>()
 
-    internal inner class Param(val name: String) {
+    inner class Param(val name: String) {
         var value: String? = null
     }
 
@@ -53,5 +53,8 @@ abstract class QueryParams {
 
     fun toMap() = params.associate { it.name to it.value }.filterOutNullValues()
 
+    override fun toString(): String {
+        return buildQueryURL("", toMap()).cpath
+    }
 
 }
