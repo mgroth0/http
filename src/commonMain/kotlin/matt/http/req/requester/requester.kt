@@ -63,21 +63,21 @@ data class HTTPRequester(
             is HTTPConnection -> {
                 when (val statusCode = it.statusCode().value.toShort()) {
                     in 300..399  -> {
-                        RedirectionException(statusCode, it.text())
+                        RedirectionException(request.url, statusCode, it.text())
                     }
 
                     in 400..499  -> when (statusCode.toInt()) {
-                        401  -> UnauthorizedException(it.text())
-                        404  -> NotFoundException(request.url)
-                        else -> ClientErrorException(statusCode, it.text())
+                        401  -> UnauthorizedException(url = request.url, it.text())
+                        404  -> NotFoundException(url = request.url)
+                        else -> ClientErrorException(uri = request.url, statusCode, it.text())
                     }
 
                     in 500..599  -> when (statusCode.toInt()) {
-                        503  -> ServiceUnavailableException(it.text())
-                        else -> ServerErrorException(statusCode, it.text())
+                        503  -> ServiceUnavailableException(uri = request.url, it.text())
+                        else -> ServerErrorException(uri = request.url, statusCode, it.text())
                     }
 
-                    !in 100..300 -> WeirdStatusCodeException(statusCode, it.text())
+                    !in 100..300 -> WeirdStatusCodeException(uri = request.url, statusCode, it.text())
                     else         -> it
                 }
             }
@@ -110,10 +110,10 @@ data class HTTPRequester(
                 delay(interAttemptWait)
             }
             if (tGotResult > keepTryingFor) {
-                return TriedForTooLongException(attempts)
+                return TriedForTooLongException(uri = request.url, attempts)
             }
         }
-        return TooManyRetrysException(attempts)
+        return TooManyRetrysException(uri = request.url, attempts)
     }
 
     suspend fun sendAndThrowUnlessConnectedCorrectly(): HTTPConnection {

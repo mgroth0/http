@@ -13,8 +13,12 @@ class HTTPRequestAttempt(
     val result: HTTPConnectResult
 )
 
-sealed class TooMuchRetryingException(attempts: List<HTTPRequestAttempt>) :
+sealed class TooMuchRetryingException(
+    uri: String,
+    attempts: List<HTTPRequestAttempt>
+) :
     HTTPConnectionProblem(
+        uri = uri,
         "No successful connection after ${attempts.size} ${
             maybePlural(
                 attempts.size, "attempt"
@@ -22,30 +26,45 @@ sealed class TooMuchRetryingException(attempts: List<HTTPRequestAttempt>) :
         }\n${attempts.joinWithNewLines { "\t${it.tSent}-${it.tGotResult}\t${it.result}" }}"
     )
 
-class TooManyRetrysException(attempts: List<HTTPRequestAttempt>) : TooMuchRetryingException(
+class TooManyRetrysException(uri: String, attempts: List<HTTPRequestAttempt>) : TooMuchRetryingException(
+    uri = uri,
     attempts
 )
 
-class TriedForTooLongException(attempts: List<HTTPRequestAttempt>) : TooMuchRetryingException(
+class TriedForTooLongException(uri: String, attempts: List<HTTPRequestAttempt>) : TooMuchRetryingException(
+    uri = uri,
     attempts
 )
 
-sealed class NoConnectionException(message: String, cause: Throwable? = null) :
-    HTTPConnectionProblem("No Connection: $message", cause = cause)
+sealed class NoConnectionException(uri: String, message: String, cause: Throwable? = null) :
+    HTTPConnectionProblem(uri = uri, "No Connection: $message", cause = cause)
 
-class HTTPExceptionWhileCreatingConnection(cause: Exception) :
-    NoConnectionException("Exception while creating connection: ${cause}: ${cause.message}", cause = cause)
+class HTTPExceptionWhileCreatingConnection(uri: String, cause: Exception) :
+    NoConnectionException(uri = uri, "Exception while creating connection: ${cause}: ${cause.message}", cause = cause)
 
-class HTTPTimeoutException(duration: Duration) : NoConnectionException("Timeout after $duration")
-sealed class HTTPBadConnectionException(status: Short, message: String) : HTTPConnectionProblem("$status: $message")
-class WeirdStatusCodeException(status: Short, message: String) : HTTPBadConnectionException(
+class HTTPTimeoutException(uri: String, duration: Duration) :
+    NoConnectionException(uri = uri, "Timeout after $duration")
+
+sealed class HTTPBadConnectionException(uri: String, status: Short, message: String) :
+    HTTPConnectionProblem(uri = uri, "$status: $message")
+
+class WeirdStatusCodeException(uri: String, status: Short, message: String) : HTTPBadConnectionException(
+    uri = uri,
     status, "is a weird status code. text=${message}"
 )
 
-class RedirectionException(status: Short, message: String) : HTTPBadConnectionException(status, message)
-sealed class HTTPErrorException(status: Short, message: String) : HTTPBadConnectionException(status, message)
-open class ClientErrorException(status: Short, message: String) : HTTPErrorException(status, message)
-class NotFoundException(url: String) : ClientErrorException(404, "Not Found: $url")
-class UnauthorizedException(message: String) : ClientErrorException(401, message)
-open class ServerErrorException(status: Short, message: String) : HTTPErrorException(status, message)
-class ServiceUnavailableException(message: String) : ServerErrorException(401, message)
+class RedirectionException(uri: String, status: Short, message: String) :
+    HTTPBadConnectionException(uri = uri, status, message)
+
+sealed class HTTPErrorException(uri: String, status: Short, message: String) :
+    HTTPBadConnectionException(uri = uri, status, message)
+
+open class ClientErrorException(uri: String, status: Short, message: String) :
+    HTTPErrorException(uri = uri, status, message)
+
+class NotFoundException(url: String) : ClientErrorException(uri = url, 404, "Not Found: $url")
+class UnauthorizedException(url: String, message: String) : ClientErrorException(uri = url, 401, message)
+open class ServerErrorException(uri: String, status: Short, message: String) :
+    HTTPErrorException(uri = uri, status, message)
+
+class ServiceUnavailableException(uri: String, message: String) : ServerErrorException(uri = uri, 401, message)

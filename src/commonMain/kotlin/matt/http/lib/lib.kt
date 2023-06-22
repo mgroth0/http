@@ -99,7 +99,10 @@ class HTTPRequestBuilder {
             val con = client.request(builder)
             HTTPConnection(con)
         } catch (e: Exception) {
-            HTTPExceptionWhileCreatingConnection(e)
+            HTTPExceptionWhileCreatingConnection(
+                uri= builder.url.toString(),
+                e
+            )
         }
     }
 }

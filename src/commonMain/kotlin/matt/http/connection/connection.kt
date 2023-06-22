@@ -12,7 +12,11 @@ sealed interface HTTPConnectResult
 
 suspend fun HTTPConnectResult.requireSuccessful() = (this as HTTPConnection).requireSuccessful()
 
-abstract class HTTPConnectionProblem(message: String, cause: Throwable? = null) : IOException(message, cause),
+abstract class HTTPConnectionProblem(
+    uri: String,
+    message: String,
+    cause: Throwable? = null
+) : IOException("$uri: $message", cause),
     HTTPConnectResult
 
 class HTTPConnection(private val response: HttpResponse) : HTTPConnectResult {
