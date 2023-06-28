@@ -4,9 +4,12 @@ package matt.http.lib
 
 import io.ktor.client.engine.*
 import io.ktor.client.engine.java.*
+import java.net.http.HttpClient.Version.HTTP_2
 
 
 actual val httpClientEngine: HttpClientEngine by lazy {
-  Java.create {
-  }
+    Java.create {
+        /*the default was http 1.1 and I think this was making heroku angry?*/
+        this.protocolVersion = HTTP_2
+    }
 }

@@ -4,6 +4,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import matt.http.HTTPDslMarker
 import matt.http.headers.HTTPMediaType.applicationJsonCharsetUTF8
+import matt.http.headers.HTTPMediaType.textPlain
 import matt.http.headers.headers
 import matt.http.method.HTTPMethod
 import matt.http.method.HTTPMethod.GET
@@ -70,13 +71,18 @@ class MutableHTTPRequest : HTTPRequest {
         }
 
 
-    fun configureForWritingString(string: String) = configureForWritingBytes(string.encodeToByteArray())
+    fun configureForWritingString(string: String) {
+        configureForWritingBytes(string.encodeToByteArray())
+        headers {
+            contentType = textPlain
+        }
+    }
 
     inline fun <reified T> configureForWritingJson(someData: T) {
+        configureForWritingBytes(Json.encodeToString(someData).encodeToByteArray())
         headers {
             contentType = applicationJsonCharsetUTF8
         }
-        configureForWritingString(Json.encodeToString(someData))
     }
 
 

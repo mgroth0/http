@@ -6,6 +6,7 @@ import matt.http.req.MutableHTTPRequest
 import matt.http.req.valueForHeader
 import matt.lang.delegation.provider
 import matt.lang.delegation.varProp
+import matt.model.data.hash.md5.MD5
 import matt.model.op.convert.StringConverter
 import matt.model.op.convert.StringStringConverter
 import matt.prim.base64.encodeToBase64
@@ -22,6 +23,7 @@ class HTTPHeaders internal constructor(private val con: MutableHTTPRequest) {
     var contentType: HTTPMediaType? by propProvider("Content-Type", HTTPContentTypeConverter)
     var accept: HTTPMediaType? by propProvider("Accept", HTTPContentTypeConverter)
     var auth: AuthHeader? by propProvider("Authorization", BearerConverter)
+    var md5: MD5? by propProvider("matt-md5", MD5Converter)
     fun setMySpecialBearerAuth(name: String, token: AuthHeader) {
         addHeader("Authorization-$name", token, BearerConverter)
     }
@@ -84,7 +86,8 @@ enum class HTTPMediaType(val string: String? = null) {
     applicationJson("application/json"),
     applicationJsonCharsetUTF8("application/json;charset=UTF-8"),
     applicationVndHerokuJson("application/vnd.heroku+json; version=3"),
-    applicationVndGitHubJson("application/vnd.github+json");
+    applicationVndGitHubJson("application/vnd.github+json"),
+    textPlain("text/plain");
 
     fun asString() = string ?: name
 }
@@ -113,6 +116,17 @@ object BearerConverter : StringConverter<AuthHeader> {
             authType = AuthType.valueOf(s.substringBefore(' ').trim()),
             token = s.substringAfter(' ').trim()
         )
+    }
+
+}
+
+object MD5Converter : StringConverter<MD5> {
+    override fun toString(t: MD5): String {
+        return t.value
+    }
+
+    override fun fromString(s: String): MD5 {
+        return MD5(s)
     }
 
 }

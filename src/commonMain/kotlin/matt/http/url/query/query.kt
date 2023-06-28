@@ -4,6 +4,7 @@ import matt.collect.map.filterOutNullValues
 import matt.http.url.MURL
 import matt.lang.delegation.provider
 import matt.lang.delegation.varProp
+import matt.model.rest.Query
 
 
 infix fun MURL.query(params: QueryParams): MURL = query(params.toMap())
@@ -14,8 +15,15 @@ infix fun MURL.withQueryParams(params: Map<String, String>): MURL {
     return buildQueryURL(cpath, params)
 }
 
-fun buildQueryURL(mainURL: String, vararg params: Pair<String, String>) = buildQueryURL(mainURL, params.toMap())
-fun buildQueryURL(mainURL: String, params: Map<String, String>): MURL {
+fun buildQueryURL(
+    mainURL: String,
+    vararg params: Pair<String, String>
+) = buildQueryURL(mainURL, params.toMap())
+
+fun buildQueryURL(
+    mainURL: String,
+    params: Map<String, String>
+): MURL {
     return MURL("$mainURL${
         params.entries.joinToString(
             separator = "&",
@@ -33,7 +41,7 @@ fun MURL.withPort(port: Int): MURL {
 }
 
 
-abstract class QueryParams {
+abstract class QueryParams : Query {
 
     val params = mutableListOf<Param>()
 
@@ -51,10 +59,15 @@ abstract class QueryParams {
     }
 
 
-    fun toMap() = params.associate { it.name to it.value }.filterOutNullValues()
+    override fun toMap() = params.associate { it.name to it.value }.filterOutNullValues()
 
-    override fun toString(): String {
+    override fun urlStringRep(): String {
         return buildQueryURL("", toMap()).cpath
     }
+
+    override fun toString(): String {
+        return urlStringRep()
+    }
+
 
 }

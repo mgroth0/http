@@ -25,7 +25,7 @@ val REQUIRES_COOKIES = listOf(
 expect val httpClientEngine: HttpClientEngine
 
 @OptIn(InternalAPI::class)
-class HTTPRequestBuilder {
+class MyHTTPRequestBuilder {
 
     companion object {
         private val client = io.ktor.client.HttpClient(httpClientEngine) {
@@ -52,7 +52,7 @@ class HTTPRequestBuilder {
         }
     }
 
-    var builder = HttpRequestBuilder()
+    val builder = HttpRequestBuilder()
 
 
     fun initialize(
@@ -97,10 +97,11 @@ class HTTPRequestBuilder {
     suspend fun send(): HTTPConnectResult {
         return try {
             val con = client.request(builder)
+//            builder.attributes
             HTTPConnection(con)
         } catch (e: Exception) {
             HTTPExceptionWhileCreatingConnection(
-                uri= builder.url.toString(),
+                uri = builder.url.toString(),
                 e
             )
         }

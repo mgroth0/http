@@ -6,8 +6,10 @@ import matt.http.headers.headers
 import matt.http.http
 import matt.http.req.MutableHTTPRequest
 import matt.http.url.MURL
+import matt.model.code.jpy.ExcludeFromPython
 
 interface API {
+    @ExcludeFromPython
     suspend fun http(
         url: String,
         op: MutableHTTPRequest.() -> Unit = {}
@@ -16,10 +18,13 @@ interface API {
 
 interface APIWithConfiguredHeaders : API {
 
+    @ExcludeFromPython
     val urlPrefix: MURL
 
+    @ExcludeFromPython
     val defaultHeaders: (HTTPHeaders.() -> Unit)? get() = null
 
+    @ExcludeFromPython
     override suspend fun http(
         url: String,
         op: MutableHTTPRequest.() -> Unit
@@ -29,5 +34,45 @@ interface APIWithConfiguredHeaders : API {
         }
         op()
     }
+
+}
+
+abstract class ConfiguredApi() : APIWithConfiguredHeaders {
+    @ExcludeFromPython
+    protected abstract val parentApi: APIWithConfiguredHeaders
+
+    @ExcludeFromPython
+    final override val urlPrefix get() = parentApi.urlPrefix
+
+    @ExcludeFromPython
+    protected open val subHeaders: (HTTPHeaders.() -> Unit)? get() = null
+
+    @ExcludeFromPython
+    final override val defaultHeaders: HTTPHeaders.() -> Unit
+        get() = {
+            val def = parentApi.defaultHeaders
+            def?.invoke(this)
+            subHeaders?.invoke(this)
+        }
+
+}
+
+abstract class SubApi(val path: String) : APIWithConfiguredHeaders {
+    @ExcludeFromPython
+    protected abstract val parentApi: APIWithConfiguredHeaders
+
+    @ExcludeFromPython
+    override val urlPrefix get() = parentApi.urlPrefix.resolve(path)
+
+    @ExcludeFromPython
+    protected open val subHeaders: (HTTPHeaders.() -> Unit)? get() = null
+
+    @ExcludeFromPython
+    final override val defaultHeaders: HTTPHeaders.() -> Unit
+        get() = {
+            val def = parentApi.defaultHeaders
+            def?.invoke(this)
+            subHeaders?.invoke(this)
+        }
 
 }
