@@ -4,7 +4,8 @@ import kotlinx.coroutines.delay
 import matt.http.connection.HTTPConnectResult
 import matt.http.connection.HTTPConnection
 import matt.http.connection.HTTPConnectionProblem
-import matt.http.lib.MyHTTPRequestBuilder
+import matt.http.connection.HTTPConnectionProblemWithResponse
+import matt.http.lib.MyNewHTTPRequestBuilder
 import matt.http.report.EndSide.Client
 import matt.http.report.HTTPRequestReport
 import matt.http.req.HTTPRequest
@@ -22,6 +23,7 @@ import matt.http.req.requester.problems.UnauthorizedException
 import matt.http.req.requester.problems.UnsupportedMediaType
 import matt.http.req.requester.problems.WeirdStatusCodeException
 import matt.lang.anno.SeeURL
+import matt.lang.require.requirePositive
 import matt.model.code.errreport.throwReport
 import matt.time.UnixTime
 import matt.time.dur.isNotZero
@@ -31,6 +33,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
+
 data class HTTPRequester(
     val request: ImmutableHTTPRequest = HTTPRequest.EXAMPLE,
     val timeout: Duration? = null,
@@ -38,11 +41,14 @@ data class HTTPRequester(
     val keepTryingFor: Duration = Duration.ZERO,
     val interAttemptWait: Duration = Duration.ZERO,
     val retryOn: suspend (HTTPConnectResult) -> Boolean = { false },
-    val verbose: Boolean = false
+    val verbose: Boolean = false,
+    val suppressAnyErrorReport: Boolean = false
 ) {
 
     init {
-        require(numAttempts >= 1)
+        require(numAttempts > 0) {
+            "numAttempts should be positive not $numAttempts"
+        }
     }
 
     companion object {
@@ -62,24 +68,62 @@ data class HTTPRequester(
     var checkConnection: suspend (HTTPConnectResult) -> HTTPConnectResult = { it ->
         when (it) {
             is HTTPConnection -> {
-                when (val statusCode = it.statusCode().value.toShort()) {
+                val statusCodeObj = it.statusCode()
+                when (val statusCode = statusCodeObj.value.toShort()) {
                     in 300..399  -> {
-                        RedirectionException(request.url, statusCode, it.text())
+                        RedirectionException(request.url, statusCodeObj, it.text(), it.headers(), it.text())
                     }
 
                     in 400..499  -> when (statusCode.toInt()) {
-                        401  -> UnauthorizedException(url = request.url, it.text())
-                        404  -> NotFoundException(url = request.url)
-                        415  -> UnsupportedMediaType(url = request.url, message = it.text())
-                        else -> ClientErrorException(uri = request.url, status = statusCode, message = it.text())
+                        401  -> UnauthorizedException(
+                            url = request.url,
+                            headers = it.headers(),
+                            message = it.text(),
+                            responseBody = it.text()
+                        )
+
+                        404  -> NotFoundException(url = request.url, headers = it.headers(), responseBody = it.text())
+                        415  -> UnsupportedMediaType(
+                            url = request.url,
+                            message = it.text(),
+                            headers = it.headers(),
+                            responseBody = it.text()
+                        )
+
+                        else -> ClientErrorException(
+                            uri = request.url,
+                            status = statusCodeObj,
+                            message = it.text(),
+                            headers = it.headers(),
+                            responseBody = it.text()
+                        )
                     }
 
                     in 500..599  -> when (statusCode.toInt()) {
-                        503  -> ServiceUnavailableException(uri = request.url, it.text())
-                        else -> ServerErrorException(uri = request.url, statusCode, it.text())
+                        503  -> ServiceUnavailableException(
+                            uri = request.url,
+                            it.text(),
+                            headers = it.headers(),
+                            responseBody = it.text()
+                        )
+
+                        else -> ServerErrorException(
+                            uri = request.url,
+                            status = statusCodeObj,
+                            it.text(),
+                            headers = it.headers(),
+                            responseBody = it.text()
+                        )
                     }
 
-                    !in 100..300 -> WeirdStatusCodeException(uri = request.url, statusCode, it.text())
+                    !in 100..300 -> WeirdStatusCodeException(
+                        uri = request.url,
+                        status = statusCodeObj,
+                        it.text(),
+                        headers = it.headers(),
+                        responseBody = it.text()
+                    )
+
                     else         -> it
                 }
             }
@@ -91,14 +135,15 @@ data class HTTPRequester(
             error("not ready to change this. I would want to modify it in a smart way, not change it with brute force.")
         }
 
+    private fun buildRequest() = build(timeout)
 
-    suspend fun send(): Pair<HTTPConnectResult, MyHTTPRequestBuilder> {
+    suspend fun send(): Pair<HTTPConnectResult, MyNewHTTPRequestBuilder> {
         val startedTrying = UnixTime()
         val attempts = mutableListOf<HTTPRequestAttempt>()
-        var built: MyHTTPRequestBuilder? = null
+        var built: MyNewHTTPRequestBuilder? = null
         for (attemptNum in 0 until numAttempts) {
             val tSent = UnixTime() - startedTrying
-            built = build(timeout)
+            built = buildRequest()
             val attempt = sendFromLib(built)
             val tGotResult = UnixTime() - startedTrying
             attempts += HTTPRequestAttempt(tSent = tSent, tGotResult = tGotResult, result = attempt)
@@ -123,27 +168,46 @@ data class HTTPRequester(
 
 
         return when (result) {
-            is HTTPConnectionProblem -> {
-                val date = nowKotlinDateTime()
-                val report = HTTPRequestReport(
-                    side = Client,
-                    date = date,
-                    uri = request.url,
-                    method = request.method.name,
-                    headers = request.headers.groupBy { it.first }.mapValues { it.value.map { it.second } },
-                    attributes = built.builder.attributes.allKeys,
-                    parameters = mapOf() /*not sure if parameters are available from the client side*/,
-                    throwReport = throwReport(result)
+            is HTTPConnectionProblemWithResponse -> {
+                weirdWhenBug(
+                    result,
+                    built
                 )
-                report.print()
-                throw result
             }
 
-            is HTTPConnection        -> result
+            is HTTPConnectionProblem             -> {
+                weirdWhenBug(
+                    result,
+                    built
+                )
+            }
+
+            is HTTPConnection                    -> result
         }
     }
 
-    private fun build(timeout: Duration? = null) = MyHTTPRequestBuilder().apply {
+    private fun weirdWhenBug(
+        result: HTTPConnectionProblem,
+        built: MyNewHTTPRequestBuilder
+    ): Nothing {
+        val date = nowKotlinDateTime()
+        if (!suppressAnyErrorReport) {
+            val report = HTTPRequestReport(
+                side = Client,
+                date = date,
+                uri = request.url,
+                method = request.method.name,
+                headers = request.headers.groupBy { it.first }.mapValues { it.value.map { it.second } },
+                attributes = built.builder.attributes.allKeys,
+                parameters = mapOf() /*not sure if parameters are available from the client side*/,
+                throwReport = throwReport(result)
+            )
+            report.print()
+        }
+        throw result
+    }
+
+    private fun build(timeout: Duration? = null) = MyNewHTTPRequestBuilder().apply {
         initialize(
             url = request.url, method = request.method, bodyWriter = request.bodyWriter
         )
@@ -151,5 +215,6 @@ data class HTTPRequester(
         applyTimeout(timeout)
     }
 
-    private suspend fun sendFromLib(built: MyHTTPRequestBuilder) = built.send()
+    private suspend fun sendFromLib(built: MyNewHTTPRequestBuilder) = built.send()
 }
+

@@ -1,7 +1,7 @@
 {
   "type": "MultiPlatformModule",
   "jvm": {},
-  "js": "LIB",
+  "js": {"type":"lib"},
   "android": {
     "type": "Lib"
   },
@@ -10,6 +10,11 @@
       "type": "Lib",
       "cfg": "commonMainApi",
       "key": "kt-stdlib"
+    },
+    {
+      "type": "Project",
+      "cfg": "commonMainApi",
+      "path": ":k:osi"
     },
     {
       "type": "Project",

@@ -17,8 +17,12 @@ import matt.http.url.query.withQueryParams
 import matt.lang.ILLEGAL
 import matt.lang.anno.SeeURL
 
+interface HasHeaders {
+    fun headersSnapshot(): List<Pair<String, String>>
+}
+
 @HTTPDslMarker
-interface HTTPRequest {
+interface HTTPRequest : HasHeaders {
     companion object {
         val EXAMPLE by lazy {
             ImmutableHTTPRequest(
@@ -32,12 +36,25 @@ interface HTTPRequest {
 
     val url: String
     val method: HTTPMethod
-    fun headersSnapshot(): List<Pair<String, String>>
+    override fun headersSnapshot(): List<Pair<String, String>>
     val bodyWriter: BodyWriter
     fun snapshot(): ImmutableHTTPRequest
 }
 
-fun HTTPRequest.valueForHeader(key: String): String? {
+open class MutableHeaders : HasHeaders {
+    protected val headerList = mutableListOf<Pair<String, String>>()
+    fun addHeader(
+        key: String,
+        value: String
+    ) {
+        headerList += key to value
+    }
+
+    override fun headersSnapshot() = headerList.toList()
+}
+
+
+fun HasHeaders.valueForHeader(key: String): String? {
     val matchingPairs = headersSnapshot().filter { it.first == key }
     return when (matchingPairs.size) {
         0    -> null
@@ -48,17 +65,10 @@ fun HTTPRequest.valueForHeader(key: String): String? {
 
 
 @SeeURL("https://youtrack.jetbrains.com/issue/KT-20427")
-class MutableHTTPRequest : HTTPRequest {
+class MutableHTTPRequest : MutableHeaders(), HTTPRequest {
     override var url = ""
     override var method = GET
     override var bodyWriter: BodyWriter = NoBody
-    private val headerList = mutableListOf<Pair<String, String>>()
-    fun addHeader(key: String, value: String) {
-        headerList += key to value
-    }
-
-    override fun headersSnapshot() = headerList.toList()
-
 
     fun configureForWritingBytes(bytes: ByteArray) {
         bodyWriter = BytesBodyWriter(bytes)
@@ -93,7 +103,10 @@ class MutableHTTPRequest : HTTPRequest {
         bodyWriter = bodyWriter
     )
 
-    fun queryParam(key: String, value: String) {
+    fun queryParam(
+        key: String,
+        value: String
+    ) {
         val murl = MURL(url)
         url = murl.withQueryParams(mapOf(key to value)).cpath
     }

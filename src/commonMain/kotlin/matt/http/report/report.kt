@@ -1,5 +1,6 @@
 package matt.http.report
 
+import io.ktor.http.*
 import io.ktor.util.*
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.encodeToString
@@ -8,6 +9,7 @@ import matt.model.code.errreport.CommonThrowReport
 import matt.model.code.errreport.Report
 import matt.prim.str.elementsToString
 import matt.prim.str.mybuild.string
+import kotlin.collections.Map.Entry
 
 enum class EndSide {
     Client, Server;
@@ -50,6 +52,32 @@ class HTTPRequestReport(
                 /*+"Payload: $payload"*/
                 +"Throw Report:"
                 +throwReport
+            }
+        }
+    }
+}
+
+class HTTPResponseReport(
+    status: HttpStatusCode,
+    headers: List<Entry<String, List<String>>>,
+    body: String
+) : Report() {
+
+
+    companion object {
+        val json = Json {
+            prettyPrint = true
+        }
+    }
+
+    override val text by lazy {
+        string {
+            lineDelimited {
+                +"HTTP Response Report"
+                blankLine()
+                +"STATUS: $status"
+                +"HEADERS: ${json.encodeToString(headers)}"
+                +"BODY: $body"
             }
         }
     }

@@ -24,35 +24,46 @@ val REQUIRES_COOKIES = listOf(
 
 expect val httpClientEngine: HttpClientEngine
 
-@OptIn(InternalAPI::class)
-class MyHTTPRequestBuilder {
 
-    companion object {
-        private val client = io.ktor.client.HttpClient(httpClientEngine) {
+interface MyHttpRequestBuilderInter {
+    val builder: HttpRequestBuilder
 
-//            this.defaultRequest {
-//                this.max
-//            }
-
-
-            install(HttpTimeout)
-
-            /*	  this.engine {
-                    this.lo
-                  }
-                  this.l
-                  this.logging {
-
-                  }
-                  install(Logging) {
-                    level = LogLevel.NONE
-                    logger = Logger.EMPTY
-                    this
-                  }*/
+    fun applyHeaders(headers: List<Pair<String, String>>) {
+        headers.forEach { (k, v) ->
+            builder.headers {
+                this.append(
+                    k,
+                    v
+                )
+            }
         }
     }
 
-    val builder = HttpRequestBuilder()
+    fun applyTimeout(timeout: Duration?) {
+        val to = timeout?.inWholeMilliseconds
+        if (to != null) {
+            builder.timeout {
+                connectTimeoutMillis = to
+                requestTimeoutMillis = to
+                socketTimeoutMillis = to
+            }
+        }
+    }
+}
+
+class MyPrebuiltHttpRequestBuilder(override val builder: HttpRequestBuilder) : MyHttpRequestBuilderInter
+
+
+@OptIn(InternalAPI::class)
+class MyNewHTTPRequestBuilder : MyHttpRequestBuilderInter {
+
+    companion object {
+        private val client = io.ktor.client.HttpClient(httpClientEngine) {
+            install(HttpTimeout)
+        }
+    }
+
+    override val builder = HttpRequestBuilder()
 
 
     fun initialize(
@@ -70,34 +81,10 @@ class MyHTTPRequestBuilder {
         builder.body = figureOutContentWriter(bodyWriter)
     }
 
-    fun applyHeaders(headers: List<Pair<String, String>>) {
-        headers.forEach { (k, v) ->
-            builder.headers {
-                this.append(
-                    k,
-                    v
-                )
-            }
-        }
-    }
-
-
-    fun applyTimeout(timeout: Duration?) {
-        val to = timeout?.inWholeMilliseconds
-        if (to != null) {
-            builder.timeout {
-                connectTimeoutMillis = to
-                requestTimeoutMillis = to
-                socketTimeoutMillis = to
-            }
-        }
-
-    }
 
     suspend fun send(): HTTPConnectResult {
         return try {
             val con = client.request(builder)
-//            builder.attributes
             HTTPConnection(con)
         } catch (e: Exception) {
             HTTPExceptionWhileCreatingConnection(

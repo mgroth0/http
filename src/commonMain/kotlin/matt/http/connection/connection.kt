@@ -6,6 +6,8 @@ import io.ktor.utils.io.*
 import io.ktor.utils.io.errors.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import matt.http.report.HTTPResponseReport
+import matt.prim.str.mybuild.lineDelimitedString
 
 
 sealed interface HTTPConnectResult
@@ -18,6 +20,23 @@ abstract class HTTPConnectionProblem(
     cause: Throwable? = null
 ) : IOException("$uri: $message", cause),
     HTTPConnectResult
+
+abstract class HTTPConnectionProblemWithResponse(
+    uri: String,
+    message: String,
+    cause: Throwable? = null,
+    status: HttpStatusCode,
+    headers: Headers,
+    responseBody: String
+) : HTTPConnectionProblem(uri = uri, message = lineDelimitedString {
+    +"message: $message"
+    +HTTPResponseReport(
+        status = status,
+        headers = headers.entries().toList(),
+        body = responseBody
+    ).text
+
+}, cause = cause), HTTPConnectResult
 
 class HTTPConnection(private val response: HttpResponse) : HTTPConnectResult {
 
@@ -49,6 +68,21 @@ class HTTPConnection(private val response: HttpResponse) : HTTPConnectResult {
             return alreadyGotHTTPStatusCode!!
         }
     }
+
+    private var alreadyGotHTTPHeaders: Headers? = null
+    private val headersMutex = Mutex()
+
+    suspend fun headers(): Headers {
+        statusMutex.withLock {
+            if (alreadyGotHTTPHeaders == null) {
+                alreadyGotHTTPHeaders = response.headers
+            }
+            return alreadyGotHTTPHeaders!!
+        }
+    }
+
+
+    suspend fun contentType() = headers()[HttpHeaders.ContentType]?.let { ContentType.parse(it) }
 
     suspend fun requireSuccessful(): HTTPConnection {
         bytes()

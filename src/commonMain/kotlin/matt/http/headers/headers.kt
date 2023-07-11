@@ -2,7 +2,7 @@ package matt.http.headers
 
 import matt.http.HTTPDslMarker
 import matt.http.headers.AuthType.Basic
-import matt.http.req.MutableHTTPRequest
+import matt.http.req.MutableHeaders
 import matt.http.req.valueForHeader
 import matt.lang.delegation.provider
 import matt.lang.delegation.varProp
@@ -12,12 +12,12 @@ import matt.model.op.convert.StringStringConverter
 import matt.prim.base64.encodeToBase64
 import matt.prim.str.joinWithSpaces
 
-fun MutableHTTPRequest.headers(op: HTTPHeaders.() -> Unit) {
+fun MutableHeaders.headers(op: HTTPHeaders.() -> Unit) {
     HTTPHeaders(this).apply(op)
 }
 
 @HTTPDslMarker
-class HTTPHeaders internal constructor(private val con: MutableHTTPRequest) {
+class HTTPHeaders internal constructor(private val con: MutableHeaders) {
 
 
     var contentType: HTTPMediaType? by propProvider("Content-Type", HTTPContentTypeConverter)
@@ -67,7 +67,7 @@ class HTTPHeaders internal constructor(private val con: MutableHTTPRequest) {
                 s?.let { converter.fromString(s) }
             },
             setter = {
-                require(it != null) {
+                requireNotNull(it) {
                     "not sure how to handle this yet"
                 }
                 addHeader(key, it, converter)

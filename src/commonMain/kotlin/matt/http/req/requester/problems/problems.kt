@@ -1,7 +1,9 @@
 package matt.http.req.requester.problems
 
+import io.ktor.http.*
 import matt.http.connection.HTTPConnectResult
 import matt.http.connection.HTTPConnectionProblem
+import matt.http.connection.HTTPConnectionProblemWithResponse
 import matt.prim.str.joinWithNewLines
 import matt.prim.str.maybePlural
 import kotlin.time.Duration
@@ -63,61 +65,114 @@ class HTTPTimeoutException(
 
 sealed class HTTPBadConnectionException(
     uri: String,
-    status: Short,
-    message: String
-) :
-    HTTPConnectionProblem(uri = uri, "$status: $message")
+    status: HttpStatusCode,
+    message: String,
+    headers: Headers,
+    responseBody: String
+) : HTTPConnectionProblemWithResponse(
+    uri = uri,
+    "$status: $message",
+    status = status,
+    headers = headers,
+    responseBody = responseBody
+)
 
 class WeirdStatusCodeException(
     uri: String,
-    status: Short,
-    message: String
+    status: HttpStatusCode,
+    message: String,
+    headers: Headers,
+    responseBody: String
 ) : HTTPBadConnectionException(
     uri = uri,
-    status, "is a weird status code. text=${message}"
+    status = status,
+    message = "is a weird status code. text=${message}", headers = headers, responseBody = responseBody
 )
 
 class RedirectionException(
     uri: String,
-    status: Short,
-    message: String
+    status: HttpStatusCode,
+    message: String,
+    headers: Headers,
+    responseBody: String
 ) :
-    HTTPBadConnectionException(uri = uri, status, message)
+    HTTPBadConnectionException(uri = uri, status, message, headers = headers, responseBody = responseBody)
 
 sealed class HTTPErrorException(
     uri: String,
-    status: Short,
-    message: String
+    status: HttpStatusCode,
+    message: String,
+    headers: Headers,
+    responseBody: String
 ) :
-    HTTPBadConnectionException(uri = uri, status, message)
+    HTTPBadConnectionException(uri = uri, status, message, headers = headers, responseBody = responseBody)
 
 open class ClientErrorException(
     uri: String,
-    status: Short,
-    message: String
+    status: HttpStatusCode,
+    message: String,
+    headers: Headers,
+    responseBody: String
 ) :
-    HTTPErrorException(uri = uri, status = status, message = message)
+    HTTPErrorException(uri = uri, status = status, message = message, headers = headers, responseBody = responseBody)
 
-class NotFoundException(url: String) : ClientErrorException(uri = url, 404, "Not Found: $url")
+class NotFoundException(
+    url: String,
+    headers: Headers,
+    responseBody: String
+) : ClientErrorException(
+    uri = url,
+    HttpStatusCode.NotFound,
+    "Not Found: $url",
+    headers = headers,
+    responseBody = responseBody
+)
+
 class UnsupportedMediaType(
     url: String,
-    message: String
-) : ClientErrorException(uri = url, 415, "Unsupported Media Type (415): $url: $message")
+    message: String,
+    headers: Headers,
+    responseBody: String
+) : ClientErrorException(
+    uri = url,
+    HttpStatusCode.UnsupportedMediaType,
+    "Unsupported Media Type (415): $url: $message",
+    headers = headers,
+    responseBody = responseBody
+)
 
 
 class UnauthorizedException(
     url: String,
-    message: String
-) : ClientErrorException(uri = url, 401, message)
+    message: String,
+    headers: Headers,
+    responseBody: String
+) : ClientErrorException(
+    uri = url,
+    HttpStatusCode.Unauthorized,
+    message,
+    headers = headers,
+    responseBody = responseBody
+)
 
 open class ServerErrorException(
     uri: String,
-    status: Short,
-    message: String
+    status: HttpStatusCode,
+    message: String,
+    headers: Headers,
+    responseBody: String
 ) :
-    HTTPErrorException(uri = uri, status, message)
+    HTTPErrorException(uri = uri, status, message, headers = headers, responseBody = responseBody)
 
 class ServiceUnavailableException(
     uri: String,
-    message: String
-) : ServerErrorException(uri = uri, 401, message)
+    message: String,
+    headers: Headers,
+    responseBody: String
+) : ServerErrorException(
+    uri = uri,
+    HttpStatusCode.ServiceUnavailable,
+    message,
+    headers = headers,
+    responseBody = responseBody
+)

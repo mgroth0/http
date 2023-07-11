@@ -8,12 +8,17 @@ import matt.http.req.MutableHTTPRequest
 import matt.http.url.MURL
 import matt.model.code.jpy.ExcludeFromPython
 
+fun MURL.asAPI() = SimpleAPI(this)
+class SimpleAPI(override val urlPrefix: MURL) : APIWithConfiguredHeaders
+
 interface API {
     @ExcludeFromPython
     suspend fun http(
         url: String,
         op: MutableHTTPRequest.() -> Unit = {}
     ): HTTPConnection
+
+
 }
 
 interface APIWithConfiguredHeaders : API {
@@ -35,9 +40,10 @@ interface APIWithConfiguredHeaders : API {
         op()
     }
 
+
 }
 
-abstract class ConfiguredApi() : APIWithConfiguredHeaders {
+abstract class ConfiguredApi : APIWithConfiguredHeaders {
     @ExcludeFromPython
     protected abstract val parentApi: APIWithConfiguredHeaders
 

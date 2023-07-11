@@ -1,14 +1,14 @@
 package matt.http.lib
 
-import io.ktor.client.engine.HttpClientEngine
-import io.ktor.client.engine.js.Js
-import io.ktor.http.content.OutgoingContent
+import io.ktor.client.engine.*
+import io.ktor.client.engine.js.*
+import io.ktor.http.content.*
 import matt.http.req.write.DuringConnectionWriter
 
 
 actual val httpClientEngine: HttpClientEngine by lazy {
   Js.create {
-    
+
   }
 }
 
