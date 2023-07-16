@@ -9,13 +9,15 @@ import matt.json.parse
 import matt.json.prim.IgnoreUnknownKeysJson
 import matt.prim.str.elementsToString
 
+@Suppress("INLINE_FROM_HIGHER_PLATFORM")
 /*this shouldn't be here. Bad module placement, but I'm in a rush for good reasons*/
 suspend inline fun <reified T : Any> HTTPConnectResult.requireIs(): T {
     val successfulConnection = requireSuccessful()
     val headers = successfulConnection.headers()
 
     try {
-        val contentType = successfulConnection.contentType() ?: return successfulConnection.text().parse<T>()
+        val contentType =
+            successfulConnection.contentType() ?: return successfulConnection.text().parse<T>()
         return when {
             T::class == String::class && Text.Plain.withCharset(Charsets.UTF_8)
                 .match(contentType) -> successfulConnection.text() as T
@@ -36,5 +38,6 @@ suspend inline fun <reified T : Any> HTTPConnectResult.requireIs(): T {
 }
 
 
+@Suppress("INLINE_FROM_HIGHER_PLATFORM")
 suspend inline fun <reified T : Any> HTTPConnectResult.requireIsPartially() =
     requireSuccessful().text().parse<T>(IgnoreUnknownKeysJson)

@@ -1,16 +1,13 @@
 {
   "type": "MultiPlatformModule",
   "jvm": {},
-  "js": {"type":"lib"},
+  "js": {
+    "type": "lib"
+  },
   "android": {
     "type": "Lib"
   },
   "dependencies": [
-    {
-      "type": "Lib",
-      "cfg": "commonMainApi",
-      "key": "kt-stdlib"
-    },
     {
       "type": "Project",
       "cfg": "commonMainApi",
@@ -66,5 +63,6 @@
       "cfg": "jvmTestImplementation",
       "key": "slf4j-nop"
     }
-  ]
+  ],
+  "note": "plugin above is false because of a small but extremely annoying and impossible warning: \"Configuration 'jsNpmAggregated' was resolved during configuration time.\"... and maybe the plugin isn't even neccesary for libraries anyway"
 }
