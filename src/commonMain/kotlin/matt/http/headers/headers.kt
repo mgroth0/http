@@ -98,7 +98,7 @@ object HTTPContentTypeConverter : StringConverter<HTTPMediaType> {
     }
 
     override fun fromString(s: String): HTTPMediaType {
-        return HTTPMediaType.values().firstOrNull {
+        return HTTPMediaType.entries.firstOrNull {
             it.asString() == s
         } ?: error("could not find content type \"$s\"")
     }
