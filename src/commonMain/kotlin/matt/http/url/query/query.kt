@@ -8,7 +8,6 @@ import matt.lang.delegation.varProp
 import matt.lang.inList
 import matt.model.op.convert.BooleanStringConverter
 import matt.model.op.convert.DefiniteIntStringConverter
-import matt.model.op.convert.IntStringConverter
 import matt.model.op.convert.StringConverter
 import matt.model.op.convert.StringList
 import matt.model.op.convert.StringListConverter
