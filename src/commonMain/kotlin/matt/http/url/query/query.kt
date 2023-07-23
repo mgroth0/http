@@ -7,6 +7,8 @@ import matt.lang.delegation.provider
 import matt.lang.delegation.varProp
 import matt.lang.inList
 import matt.model.op.convert.BooleanStringConverter
+import matt.model.op.convert.DefiniteIntStringConverter
+import matt.model.op.convert.IntStringConverter
 import matt.model.op.convert.StringConverter
 import matt.model.op.convert.StringList
 import matt.model.op.convert.StringListConverter
@@ -124,6 +126,8 @@ abstract class QueryParams : Query {
     fun stringParam() = singleParam(StringStringConverter)
 
     fun boolParam() = singleParam(BooleanStringConverter)
+
+    fun intParam() = singleParam(DefiniteIntStringConverter)
 
     fun <T : Any> singleParam(converter: StringConverter<T>) =
         param(StringListConverter.fromStringConverterAsSingular(converter))
