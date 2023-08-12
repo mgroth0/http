@@ -1,9 +1,9 @@
 package matt.http.url.req
 
-import kotlinx.coroutines.test.runTest
 import matt.http.http
 import matt.http.lib.RequiresCookiesException
 import matt.http.url.valid.ValidURLTests.Companion.GOOGLE
+import matt.test.co.runTestWithTimeoutOnlyIfTestingPerformance
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 
@@ -14,14 +14,14 @@ class HttpRequests {
     }
 
     @Test
-    fun twitter() = runTest {
+    fun twitter() = runTestWithTimeoutOnlyIfTestingPerformance {
         assertThrows<RequiresCookiesException> {
             http(TWITTER)
         }
     }
 
     @Test
-    fun google() = runTest {
+    fun google() = runTestWithTimeoutOnlyIfTestingPerformance {
         http(GOOGLE)
     }
 
