@@ -99,7 +99,7 @@ class RedirectionException(
     HTTPBadConnectionException(uri = uri, status, message, headers = headers, responseBody = responseBody)
 
 sealed class HTTPErrorException(
-    uri: String,
+    val uri: String,
     status: HttpStatusCode,
     message: String,
     headers: Headers,
