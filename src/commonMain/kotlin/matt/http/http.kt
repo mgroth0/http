@@ -28,6 +28,10 @@ suspend fun FileOrURL.http(
     requester: HTTPRequester = HTTPRequester.DEFAULT,
     op: MutableHTTPRequest.() -> Unit = {},
 ): HTTPConnection {
+
+
+
+
     val req = MutableHTTPRequest()
     req.url = this.cpath
     req.op()
