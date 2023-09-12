@@ -2,6 +2,7 @@ package matt.http.connection
 
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.util.*
 import io.ktor.utils.io.*
 import io.ktor.utils.io.errors.*
 import kotlinx.coroutines.sync.Mutex
@@ -9,19 +10,51 @@ import kotlinx.coroutines.sync.withLock
 import matt.http.report.HTTPResponseReport
 import matt.prim.str.mybuild.lineDelimitedString
 
-
 sealed interface HTTPConnectResult
+
+sealed interface MultipleHTTPConnectResult : HTTPConnectResult {
+    val requestAttributes: List<Attributes>
+}
+
+sealed interface SingleHTTPConnectResult : HTTPConnectResult {
+    val requestAttributes: Attributes
+}
 
 suspend fun HTTPConnectResult.requireSuccessful() = (this as HTTPConnection).requireSuccessful()
 
-abstract class HTTPConnectionProblem(
+/*class ImmutableRequestData(
+    val request: ImmutableHTTPRequest,
+    val attributes: Attributes
+)*/
+
+
+sealed class HTTPConnectionProblem(
     uri: String,
     message: String,
     cause: Throwable? = null
 ) : IOException("$uri: $message", cause),
     HTTPConnectResult
 
+
+
+abstract class HTTPConnectionProblemWithMultipleRequests(
+    uri: String,
+    message: String,
+    override val requestAttributes: List<Attributes>,
+    cause: Throwable? = null,
+) : IOException("$uri: $message", cause),
+    HTTPConnectResult, MultipleHTTPConnectResult
+
+abstract class HTTPConnectionProblemNoResponse(
+    uri: String,
+    message: String,
+    override val requestAttributes: Attributes,
+    cause: Throwable? = null
+) : HTTPConnectionProblem(uri=uri,message=message,cause=cause),
+    SingleHTTPConnectResult
+
 abstract class HTTPConnectionProblemWithResponse(
+    override val requestAttributes: Attributes,
     uri: String,
     message: String,
     cause: Throwable? = null,
@@ -36,9 +69,12 @@ abstract class HTTPConnectionProblemWithResponse(
         body = responseBody
     ).text
 
-}, cause = cause), HTTPConnectResult
+}, cause = cause), SingleHTTPConnectResult
 
-class HTTPConnection(private val response: HttpResponse) : HTTPConnectResult {
+class HTTPConnection(
+    override val requestAttributes: Attributes,
+    private val response: HttpResponse
+) : SingleHTTPConnectResult {
 
 
     private var alreadyReadBytes: ByteArray? = null

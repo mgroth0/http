@@ -22,7 +22,7 @@ class HTTPRequestReport(
     side: EndSide,
     date: LocalDateTime,
     throwReport: CommonThrowReport,
-    attributes: List<AttributeKey<*>>,
+    attributes: List<Attributes>,
     parameters: Map<String, List<String>>,
     uri: String,
     method: String,

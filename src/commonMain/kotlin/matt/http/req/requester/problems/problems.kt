@@ -1,9 +1,12 @@
 package matt.http.req.requester.problems
 
 import io.ktor.http.*
-import matt.http.connection.HTTPConnectResult
-import matt.http.connection.HTTPConnectionProblem
+import io.ktor.util.*
+import matt.http.connection.HTTPConnectionProblemNoResponse
+import matt.http.connection.HTTPConnectionProblemWithMultipleRequests
 import matt.http.connection.HTTPConnectionProblemWithResponse
+import matt.http.connection.SingleHTTPConnectResult
+import matt.model.code.errreport.infoString
 import matt.prim.str.joinWithNewLines
 import matt.prim.str.maybePlural
 import kotlin.time.Duration
@@ -12,167 +15,151 @@ import kotlin.time.Duration
 class HTTPRequestAttempt(
     val tSent: Duration,
     val tGotResult: Duration,
-    val result: HTTPConnectResult
+    val result: SingleHTTPConnectResult
 )
 
 sealed class TooMuchRetryingException(
     uri: String,
-    attempts: List<HTTPRequestAttempt>
-) :
-    HTTPConnectionProblem(
-        uri = uri,
-        "No successful connection after ${attempts.size} ${
-            maybePlural(
-                attempts.size, "attempt"
-            )
-        }\n${attempts.joinWithNewLines { "\t${it.tSent}-${it.tGotResult}\t${it.result}" }}"
-    )
+    attempts: List<HTTPRequestAttempt>,
+    problems: List<Exception>
+) : HTTPConnectionProblemWithMultipleRequests(uri = uri,
+    "No successful connection after ${attempts.size} ${
+        maybePlural(
+            attempts.size, "attempt"
+        )
+    }\n${attempts.joinWithNewLines { "\t${it.tSent}-${it.tGotResult}\t${it.result}" }}\n\n\n" + problems.joinWithNewLines { it.infoString() },
+    requestAttributes = attempts.map { it.result.requestAttributes })
 
 class TooManyRetrysException(
     uri: String,
-    attempts: List<HTTPRequestAttempt>
+    attempts: List<HTTPRequestAttempt>,
+    problems: List<Exception>
 ) : TooMuchRetryingException(
-    uri = uri,
-    attempts
+    uri = uri, attempts, problems
 )
 
 class TriedForTooLongException(
     uri: String,
-    attempts: List<HTTPRequestAttempt>
+    attempts: List<HTTPRequestAttempt>,
+    problems: List<Exception>
 ) : TooMuchRetryingException(
-    uri = uri,
-    attempts
+    uri = uri, attempts, problems
 )
 
 sealed class NoConnectionException(
     uri: String,
     message: String,
+    requestAttributes: Attributes,
     cause: Throwable? = null
-) :
-    HTTPConnectionProblem(uri = uri, "No Connection: $message", cause = cause)
+) : HTTPConnectionProblemNoResponse(
+    uri = uri, "No Connection: $message", cause = cause, requestAttributes = requestAttributes
+)
 
 class HTTPExceptionWhileCreatingConnection(
     uri: String,
-    cause: Exception
-) :
-    NoConnectionException(uri = uri, "Exception while creating connection: ${cause}: ${cause.message}", cause = cause)
+    cause: Exception,
+    requestAttributes: Attributes,
+) : NoConnectionException(
+    uri = uri,
+    "Exception while creating connection: ${cause}: ${cause.message}",
+    cause = cause,
+    requestAttributes = requestAttributes
+)
 
 class HTTPTimeoutException(
     uri: String,
-    duration: Duration
-) :
-    NoConnectionException(uri = uri, "Timeout after $duration")
+    duration: Duration,
+    requestAttributes: Attributes,
+) : NoConnectionException(uri = uri, "Timeout after $duration", requestAttributes = requestAttributes)
 
 sealed class HTTPBadConnectionException(
     uri: String,
     status: HttpStatusCode,
     message: String,
     headers: Headers,
-    responseBody: String
+    responseBody: String,
+    requestAttributes: Attributes
 ) : HTTPConnectionProblemWithResponse(
     uri = uri,
-    "$status: $message",
+    message = "$status: $message",
     status = status,
     headers = headers,
-    responseBody = responseBody
+    responseBody = responseBody,
+    requestAttributes = requestAttributes
+) {
+    constructor(exceptionData: HttpExceptionData) : this(
+        uri = exceptionData.uri,
+        status = exceptionData.status,
+        message = exceptionData.message,
+        headers = exceptionData.headers,
+        responseBody = exceptionData.responseBody,
+        requestAttributes = exceptionData.requestAttributes
+    )
+}
+
+data class HttpExceptionDataNoMessage(
+    val uri: String,
+    val status: HttpStatusCode,
+    val headers: Headers,
+    val responseBody: String,
+    val requestAttributes: Attributes
+) {
+    fun withMessage(m: String) = HttpExceptionData(
+        uri = uri,
+        status = status,
+        message = m,
+        headers = headers,
+        responseBody = responseBody,
+        requestAttributes = requestAttributes
+    )
+    fun withBodyAsMessage() = withMessage(responseBody)
+}
+
+data class HttpExceptionData(
+    val uri: String,
+    val status: HttpStatusCode,
+    val message: String,
+    val headers: Headers,
+    val responseBody: String,
+    val requestAttributes: Attributes
 )
+
 
 class WeirdStatusCodeException(
-    uri: String,
-    status: HttpStatusCode,
-    message: String,
-    headers: Headers,
-    responseBody: String
-) : HTTPBadConnectionException(
-    uri = uri,
-    status = status,
-    message = "is a weird status code. text=${message}", headers = headers, responseBody = responseBody
-)
+    exceptionData: HttpExceptionData
+) : HTTPBadConnectionException(exceptionData.copy(message = "is a weird status code. text=${exceptionData.message}"))
 
 class RedirectionException(
-    uri: String,
-    status: HttpStatusCode,
-    message: String,
-    headers: Headers,
-    responseBody: String
-) :
-    HTTPBadConnectionException(uri = uri, status, message, headers = headers, responseBody = responseBody)
+    exceptionData: HttpExceptionData
+) : HTTPBadConnectionException(exceptionData)
 
-sealed class HTTPErrorException(
-    val uri: String,
-    status: HttpStatusCode,
-    message: String,
-    headers: Headers,
-    responseBody: String
-) :
-    HTTPBadConnectionException(uri = uri, status, message, headers = headers, responseBody = responseBody)
+sealed class HTTPErrorException(val exceptionData: HttpExceptionData) : HTTPBadConnectionException(exceptionData)
 
 open class ClientErrorException(
-    uri: String,
-    status: HttpStatusCode,
-    message: String,
-    headers: Headers,
-    responseBody: String
-) :
-    HTTPErrorException(uri = uri, status = status, message = message, headers = headers, responseBody = responseBody)
+    exceptionData: HttpExceptionData
+) : HTTPErrorException(exceptionData)
 
 class NotFoundException(
-    url: String,
-    headers: Headers,
-    responseBody: String
-) : ClientErrorException(
-    uri = url,
-    HttpStatusCode.NotFound,
-    "Not Found: $url",
-    headers = headers,
-    responseBody = responseBody
-)
+    exceptionData: HttpExceptionDataNoMessage
+) : ClientErrorException(exceptionData.withMessage("Not Found: ${exceptionData.uri}"))
 
 class UnsupportedMediaType(
-    url: String,
-    message: String,
-    headers: Headers,
-    responseBody: String
+    exceptionData: HttpExceptionData
 ) : ClientErrorException(
-    uri = url,
-    HttpStatusCode.UnsupportedMediaType,
-    "Unsupported Media Type (415): $url: $message",
-    headers = headers,
-    responseBody = responseBody
+    exceptionData.copy(message = "Unsupported Media Type (415): ${exceptionData.uri}: ${exceptionData.message}")
 )
 
 
 class UnauthorizedException(
-    url: String,
-    message: String,
-    headers: Headers,
-    responseBody: String
-) : ClientErrorException(
-    uri = url,
-    HttpStatusCode.Unauthorized,
-    message,
-    headers = headers,
-    responseBody = responseBody
-)
+    exceptionData: HttpExceptionData
+) : ClientErrorException(exceptionData.also { require(it.status == HttpStatusCode.Unauthorized) })
 
 open class ServerErrorException(
-    uri: String,
-    status: HttpStatusCode,
-    message: String,
-    headers: Headers,
-    responseBody: String
-) :
-    HTTPErrorException(uri = uri, status, message, headers = headers, responseBody = responseBody)
+    exceptionData: HttpExceptionData
+) : HTTPErrorException(exceptionData)
 
 class ServiceUnavailableException(
-    uri: String,
-    message: String,
-    headers: Headers,
-    responseBody: String
+    exceptionData: HttpExceptionData
 ) : ServerErrorException(
-    uri = uri,
-    HttpStatusCode.ServiceUnavailable,
-    message,
-    headers = headers,
-    responseBody = responseBody
+    exceptionData.also { require(it.status == HttpStatusCode.ServiceUnavailable) }
 )

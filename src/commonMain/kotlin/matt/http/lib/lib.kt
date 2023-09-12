@@ -7,8 +7,8 @@ import io.ktor.client.utils.*
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.util.*
-import matt.http.connection.HTTPConnectResult
 import matt.http.connection.HTTPConnection
+import matt.http.connection.SingleHTTPConnectResult
 import matt.http.method.HTTPMethod
 import matt.http.req.requester.problems.HTTPExceptionWhileCreatingConnection
 import matt.http.req.write.BodyWriter
@@ -39,9 +39,9 @@ interface MyHttpRequestBuilderInter {
         }
     }
 
-    fun applyTimeout(timeout: Duration?) {
-        val to = timeout?.inWholeMilliseconds
-        if (to != null) {
+    fun applyTimeout(timeout: Duration) {
+        if (timeout != Duration.INFINITE) {
+            val to = timeout.inWholeMilliseconds
             builder.timeout {
                 connectTimeoutMillis = to
                 requestTimeoutMillis = to
@@ -82,14 +82,15 @@ class MyNewHTTPRequestBuilder : MyHttpRequestBuilderInter {
     }
 
 
-    suspend fun send(): HTTPConnectResult {
+    suspend fun send(): SingleHTTPConnectResult {
         return try {
             val con = client.request(builder)
-            HTTPConnection(con)
+            HTTPConnection(builder.attributes, con)
         } catch (e: Exception) {
             HTTPExceptionWhileCreatingConnection(
                 uri = builder.url.toString(),
-                e
+                cause = e,
+                requestAttributes = builder.attributes
             )
         }
     }
