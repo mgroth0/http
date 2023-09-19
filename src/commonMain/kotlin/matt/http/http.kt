@@ -1,6 +1,6 @@
 package matt.http
 
-import matt.file.FileOrURL
+import matt.lang.model.file.FileOrURL
 import matt.http.connection.HTTPConnection
 import matt.http.req.MutableHTTPRequest
 import matt.http.req.requester.HTTPRequester

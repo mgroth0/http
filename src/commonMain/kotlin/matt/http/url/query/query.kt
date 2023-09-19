@@ -8,16 +8,16 @@ import matt.lang.delegation.varProp
 import matt.lang.inList
 import matt.model.op.convert.BooleanStringConverter
 import matt.model.op.convert.DefiniteIntStringConverter
-import matt.model.op.convert.StringConverter
-import matt.model.op.convert.StringList
-import matt.model.op.convert.StringListConverter
-import matt.model.op.convert.StringListStringListConverter
 import matt.model.op.convert.StringStringConverter
 import matt.osi.params.RawParams
 import matt.osi.params.query.Query
 import matt.osi.params.query.QueryParam
+import matt.prim.converters.StringConverter
+import matt.prim.converters.StringList
+import matt.prim.converters.StringListConverter
+import matt.prim.converters.StringListStringListConverter
 import matt.prim.str.elementsToString
-import matt.prim.str.mybuild.string
+import matt.prim.str.mybuild.api.string
 import kotlin.jvm.JvmName
 
 @JvmName("query1")

@@ -7,9 +7,9 @@ import matt.http.req.valueForHeader
 import matt.lang.delegation.provider
 import matt.lang.delegation.varProp
 import matt.model.data.hash.md5.MD5
-import matt.model.op.convert.StringConverter
 import matt.model.op.convert.StringStringConverter
 import matt.prim.base64.encodeToBase64
+import matt.prim.converters.StringConverter
 import matt.prim.str.joinWithSpaces
 
 fun MutableHeaders.headers(op: HTTPHeaders.() -> Unit) {

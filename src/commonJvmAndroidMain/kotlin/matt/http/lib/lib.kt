@@ -7,9 +7,10 @@ import io.ktor.client.content.*
 import io.ktor.http.content.*
 import io.ktor.utils.io.*
 import io.ktor.utils.io.jvm.javaio.*
-import matt.file.MFile
+import matt.lang.model.file.FsFile
 import matt.http.req.write.DuringConnectionWriter
 import matt.lang.anno.SeeURL
+import matt.lang.file.toJFile
 import java.io.InputStream
 
 //
@@ -24,7 +25,7 @@ import java.io.InputStream
 actual fun figureOutLiveContentWriter(bodyWriter: DuringConnectionWriter): OutgoingContent {
     return when (val jWriter = (bodyWriter as JDuringConnectionWriter)) {
         is StreamBodyWriter -> StreamContent(jWriter.stream)
-        is FileBodyWriter   -> LocalFileContent(jWriter.file)
+        is FileBodyWriter   -> LocalFileContent(jWriter.file.toJFile())
     }
 }
 
@@ -39,4 +40,4 @@ class StreamContent(private val stream: InputStream) : OutgoingContent.WriteChan
 
 sealed interface JDuringConnectionWriter : DuringConnectionWriter
 class StreamBodyWriter(val stream: InputStream) : JDuringConnectionWriter
-class FileBodyWriter(val file: MFile) : JDuringConnectionWriter
+class FileBodyWriter(val file: FsFile) : JDuringConnectionWriter

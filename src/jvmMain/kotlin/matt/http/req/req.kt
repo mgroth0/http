@@ -2,10 +2,10 @@
 
 package matt.http.req
 
-import matt.file.MFile
+import matt.file.JioFile
 import matt.http.lib.FileBodyWriter
 
 
-fun MutableHTTPRequest.configureForWritingFile(file: MFile) {
+fun MutableHTTPRequest.configureForWritingFile(file: JioFile) {
   bodyWriter = FileBodyWriter(file)
 }

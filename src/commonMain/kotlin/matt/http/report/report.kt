@@ -8,7 +8,7 @@ import kotlinx.serialization.json.Json
 import matt.model.code.errreport.CommonThrowReport
 import matt.model.code.errreport.Report
 import matt.prim.str.elementsToString
-import matt.prim.str.mybuild.string
+import matt.prim.str.mybuild.api.string
 import kotlin.collections.Map.Entry
 
 enum class EndSide {

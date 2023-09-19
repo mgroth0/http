@@ -8,7 +8,7 @@ import io.ktor.utils.io.errors.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import matt.http.report.HTTPResponseReport
-import matt.prim.str.mybuild.lineDelimitedString
+import matt.prim.str.mybuild.api.lineDelimitedString
 
 sealed interface HTTPConnectResult
 
