@@ -3,14 +3,14 @@
 
 package matt.http.internet
 
+import matt.lang.url.toURL
 import java.io.IOException
 import java.net.MalformedURLException
-import java.net.URL
 import java.net.URLConnection
 
 actual fun TheInternet.isAvailable(): Boolean {
     return try {
-        val url = URL("http://www.google.com")
+        val url = "http://www.google.com".toURL()
         val conn: URLConnection = url.openConnection()
         conn.connect()
         conn.getInputStream().close()
