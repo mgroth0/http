@@ -68,7 +68,7 @@ abstract class SubApi(val path: String) : APIWithConfiguredHeaders {
     protected abstract val parentApi: APIWithConfiguredHeaders
 
     @ExcludeFromPython
-    override val urlPrefix get() = parentApi.urlPrefix.resolve(path)
+    final override val urlPrefix get() = parentApi.urlPrefix.resolve(path)
 
     @ExcludeFromPython
     protected open val subHeaders: (HTTPHeaders.() -> Unit)? get() = null

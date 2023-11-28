@@ -130,6 +130,7 @@ class HTTPConnection(
         println(text())
     }
 
+    suspend fun bodyAsChannel() = response.bodyAsChannel()
 
     suspend fun consumeLines(op: (String) -> Unit) {
         val channel = response.bodyAsChannel()

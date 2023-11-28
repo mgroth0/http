@@ -1,8 +1,10 @@
+@file:JvmName("UrlJvmAndroidKt")
 package matt.http.url
 
 import matt.file.JioFile
 import matt.file.URLLike
 import matt.http.http
+import matt.lang.model.file.FileOrURL
 import matt.prim.str.ensureSuffix
 import java.net.URI
 import java.net.URL
@@ -22,7 +24,7 @@ actual class MURL actual constructor(path: String) : CommonURL, URLLike {
 
     actual val protocol: String by lazy { jURL.protocol }
 
-    override operator fun get(item: String) = resolve(item)
+    actual override operator fun get(item: String): FileOrURL = resolve(item)
     actual override fun resolve(other: String): MURL {
         /*the java way is weird and discards a segment*/
         return MURL(cpath.ensureSuffix(JioFile.unixSeparator) + other.removePrefix(JioFile.unixSeparator))
@@ -40,4 +42,5 @@ actual class MURL actual constructor(path: String) : CommonURL, URLLike {
     override operator fun plus(other: String): MURL = resolve(other)
 
 }
+
 

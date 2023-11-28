@@ -51,23 +51,18 @@
     },
     {
       "type": "Project",
-      "cfg": "jvmTestImplementation",
+      "cfg": "commonTestImplementation",
       "path": ":k:test:co"
     },
     {
       "type": "Project",
-      "cfg": "jvmTestImplementation",
+      "cfg": "commonTestImplementation",
       "path": ":k:test"
     },
     {
       "type": "Lib",
-      "cfg": "jvmTestImplementation",
+      "cfg": "commonTestImplementation",
       "key": "kotlinx-coroutines-test"
-    },
-    {
-      "type": "Lib",
-      "cfg": "jvmTestImplementation",
-      "key": "slf4j-nop"
     }
   ],
   "note": "plugin above is false because of a small but extremely annoying and impossible warning: \"Configuration 'jsNpmAggregated' was resolved during configuration time.\"... and maybe the plugin isn't even neccesary for libraries anyway"

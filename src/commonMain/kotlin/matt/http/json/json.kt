@@ -7,7 +7,14 @@ import matt.http.connection.HTTPConnectResult
 import matt.http.connection.requireSuccessful
 import matt.json.parse
 import matt.json.prim.IgnoreUnknownKeysJson
+import matt.lang.charset.DEFAULT_CHARSET_NAME_CAP
 import matt.prim.str.elementsToString
+
+val KTOR_COMMON_DEFAULT_CHARSET_THING by lazy {
+    Charsets.UTF_8.also {
+        check(it.name == DEFAULT_CHARSET_NAME_CAP)
+    }
+}
 
 @Suppress("INLINE_FROM_HIGHER_PLATFORM")
 /*this shouldn't be here. Bad module placement, but I'm in a rush for good reasons*/
@@ -19,7 +26,7 @@ suspend inline fun <reified T : Any> HTTPConnectResult.requireIs(): T {
         val contentType =
             successfulConnection.contentType() ?: return successfulConnection.text().parse<T>()
         return when {
-            T::class == String::class && Text.Plain.withCharset(Charsets.UTF_8)
+            T::class == String::class && Text.Plain.withCharset(KTOR_COMMON_DEFAULT_CHARSET_THING)
                 .match(contentType) -> successfulConnection.text() as T
 
             T::class == ByteArray::class && Application.OctetStream.match(contentType) -> successfulConnection.bytes() as T

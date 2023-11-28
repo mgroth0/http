@@ -1,6 +1,6 @@
 package matt.http.internet
 
-import matt.lang.require.requireEquals
+import matt.lang.assertions.require.requireEquals
 import org.w3c.xhr.XMLHttpRequest
 
 

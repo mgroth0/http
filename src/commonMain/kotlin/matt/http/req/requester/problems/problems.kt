@@ -112,6 +112,7 @@ data class HttpExceptionDataNoMessage(
         responseBody = responseBody,
         requestAttributes = requestAttributes
     )
+
     fun withBodyAsMessage() = withMessage(responseBody)
 }
 
@@ -141,7 +142,8 @@ open class ClientErrorException(
 
 class NotFoundException(
     exceptionData: HttpExceptionDataNoMessage
-) : ClientErrorException(exceptionData.withMessage("Not Found: ${exceptionData.uri}"))
+    /*need single quites here. Not Found often has to do with URLs being completely wrong do to some string manipulation failure. The single quotes here tell me exactly what uri was attempted without ambiguity in the message.*/
+) : ClientErrorException(exceptionData.withMessage("Not Found (uri between single quotes): '${exceptionData.uri}'"))
 
 class UnsupportedMediaType(
     exceptionData: HttpExceptionData

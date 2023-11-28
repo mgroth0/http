@@ -9,7 +9,7 @@ import matt.http.req.ImmutableHTTPRequest
 import matt.http.req.requester.problems.HTTPRequestAttempt
 import matt.http.req.requester.problems.TooManyRetrysException
 import matt.http.req.requester.problems.TriedForTooLongException
-import matt.lang.require.requirePositive
+import matt.lang.assertions.require.requirePositive
 import matt.time.UnixTime
 import matt.time.dur.isNotZero
 import kotlin.time.Duration

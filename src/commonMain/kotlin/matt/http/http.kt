@@ -1,10 +1,10 @@
 package matt.http
 
-import matt.lang.model.file.FileOrURL
 import matt.http.connection.HTTPConnection
 import matt.http.req.MutableHTTPRequest
 import matt.http.req.requester.HTTPRequester
 import matt.http.url.MURL
+import matt.lang.model.file.FileOrURL
 import kotlin.jvm.JvmName
 
 
@@ -28,8 +28,6 @@ suspend fun FileOrURL.http(
     requester: HTTPRequester = HTTPRequester.DEFAULT,
     op: MutableHTTPRequest.() -> Unit = {},
 ): HTTPConnection {
-
-
 
 
     val req = MutableHTTPRequest()

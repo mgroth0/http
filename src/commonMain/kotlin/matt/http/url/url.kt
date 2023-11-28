@@ -1,8 +1,8 @@
 
 package matt.http.url
 
-import matt.lang.model.file.FileOrURL
 import matt.http.url.valid.isValidHttpUrl
+import matt.lang.model.file.FileOrURL
 import matt.lang.model.file.UnsafeFilePath
 
 interface CommonURL : FileOrURL {
@@ -22,6 +22,7 @@ expect class MURL(path: String) : CommonURL {
 
     val protocol: String
 
+    override val cpath: String
 
     override fun resolve(other: String): MURL
 
@@ -30,6 +31,9 @@ expect class MURL(path: String) : CommonURL {
     suspend fun loadText(): String
 
 
+    override operator fun plus(other: String): MURL
+
+    override operator fun get(item: String): FileOrURL
 
 }
 

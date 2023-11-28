@@ -7,7 +7,7 @@ external fun decodeURIComponent(encodedURI: String): String
 
 actual class MURL actual constructor(path: String) : CommonURL {
 
-    override val cpath = path
+    actual override val cpath = path
 
     private val jsURL by lazy { URL(path) }
 
@@ -23,4 +23,6 @@ actual class MURL actual constructor(path: String) : CommonURL {
 
     actual suspend fun loadText() = http().text()
     /*requester.send()*/
+
+    actual override fun plus(other: String): MURL = resolve(other)
 }
