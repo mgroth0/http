@@ -3,8 +3,8 @@ package matt.http.url.heroku
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
 import matt.http.api.APIWithConfiguredHeaders
-import matt.http.headers.AuthHeader
 import matt.http.headers.HTTPHeaders
+import matt.http.headers.auth.AuthHeader
 import matt.http.url.MURL
 import kotlin.jvm.JvmInline
 

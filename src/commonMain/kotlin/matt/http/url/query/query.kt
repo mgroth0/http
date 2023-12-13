@@ -8,6 +8,7 @@ import matt.lang.delegation.varProp
 import matt.lang.inList
 import matt.model.op.convert.BooleanStringConverter
 import matt.model.op.convert.DefiniteIntStringConverter
+import matt.model.op.convert.EnumNameStringConverter
 import matt.model.op.convert.StringStringConverter
 import matt.osi.params.RawParams
 import matt.osi.params.query.Query
@@ -18,6 +19,7 @@ import matt.prim.converters.StringListConverter
 import matt.prim.converters.StringListStringListConverter
 import matt.prim.str.elementsToString
 import matt.prim.str.mybuild.api.string
+import kotlin.enums.enumEntries
 import kotlin.jvm.JvmName
 
 @JvmName("query1")
@@ -75,6 +77,18 @@ fun buildQueryURL(
 }
 
 
+fun MURL.withFragment(fragment: String) = buildFragmentURL(cpath,fragment)
+
+fun buildFragmentURL(
+    mainURL: String,
+    fragment: String
+): MURL {
+    check("#" !in mainURL)
+    check("#" !in fragment)
+    return MURL("$mainURL#$fragment")
+}
+
+
 fun MURL.withPort(port: Int): MURL {
     if (":" in cpath) {
         error("not ready if already has port")
@@ -127,6 +141,9 @@ abstract class QueryParams : Query {
     fun boolParam() = singleParam(BooleanStringConverter)
 
     fun intParam() = singleParam(DefiniteIntStringConverter)
+
+
+    inline fun <reified E : Enum<E>> enumParam() = singleParam(EnumNameStringConverter(enumEntries<E>()))
 
     fun <T : Any> singleParam(converter: StringConverter<T>) =
         param(StringListConverter.fromStringConverterAsSingular(converter))

@@ -3,8 +3,8 @@ package matt.http.req
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import matt.http.HTTPDslMarker
-import matt.http.headers.HTTPMediaType.applicationJsonCharsetUTF8
-import matt.http.headers.HTTPMediaType.textPlain
+import matt.http.headers.content.HTTPMediaType.applicationJsonCharsetUTF8
+import matt.http.headers.content.HTTPMediaType.textPlain
 import matt.http.headers.headers
 import matt.http.method.HTTPMethod
 import matt.http.method.HTTPMethod.GET
@@ -42,7 +42,7 @@ interface HTTPRequest : HasHeaders {
 }
 
 open class MutableHeaders : HasHeaders {
-    protected val headerList = mutableListOf<Pair<String, String>>()
+    private val headerList = mutableListOf<Pair<String, String>>()
     fun addHeader(
         key: String,
         value: String

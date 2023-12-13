@@ -5,7 +5,7 @@ import org.w3c.dom.url.URL
 
 external fun decodeURIComponent(encodedURI: String): String
 
-actual class MURL actual constructor(path: String) : CommonURL {
+actual class MURL actual constructor(path: String) : CommonUrl, UrlResolver {
 
     actual override val cpath = path
 
@@ -14,7 +14,7 @@ actual class MURL actual constructor(path: String) : CommonURL {
     actual val protocol: String get() = jsURL.protocol
 
     actual override fun resolve(other: String) = MURL(
-        cpath.removeSuffix(CommonURL.URL_SEP) + CommonURL.URL_SEP + other.removePrefix(CommonURL.URL_SEP)
+        cpath.removeSuffix(CommonUrl.URL_SEP) + CommonUrl.URL_SEP + other.removePrefix(CommonUrl.URL_SEP)
     )
 
     actual override fun toString() = cpath
@@ -25,4 +25,7 @@ actual class MURL actual constructor(path: String) : CommonURL {
     /*requester.send()*/
 
     actual override fun plus(other: String): MURL = resolve(other)
+
+
+    actual override fun get(item: String): MURL = resolve(item)
 }

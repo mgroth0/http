@@ -6,7 +6,7 @@ import matt.http.headers.headers
 import matt.http.http
 import matt.http.req.MutableHTTPRequest
 import matt.http.url.MURL
-import matt.model.code.jpy.ExcludeFromPython
+import matt.lang.jpy.ExcludeFromPython
 
 fun MURL.asAPI() = SimpleAPI(this)
 class SimpleAPI(override val urlPrefix: MURL) : APIWithConfiguredHeaders
