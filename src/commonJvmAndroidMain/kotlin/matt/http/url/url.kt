@@ -15,7 +15,7 @@ actual class MURL actual constructor(path: String) : CommonUrl, URLLike, UrlReso
     constructor(uri: URI) : this(uri.toString())
     constructor(url: URL) : this(url.toString())
 
-    override val cpath = path
+    actual override val cpath = path
 
     override fun toJavaURI(): URI {
         return URI(cpath)
@@ -40,7 +40,7 @@ actual class MURL actual constructor(path: String) : CommonUrl, URLLike, UrlReso
 
     fun open(): Nothing = TODO()
 
-    override operator fun plus(other: String): MURL = resolve(other)
+    actual override operator fun plus(other: String): MURL = resolve(other)
 
 }
 
