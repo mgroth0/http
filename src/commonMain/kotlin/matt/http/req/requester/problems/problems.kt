@@ -1,14 +1,15 @@
 package matt.http.req.requester.problems
 
-import io.ktor.http.*
-import io.ktor.util.*
+import io.ktor.http.Headers
+import io.ktor.http.HttpStatusCode
+import io.ktor.util.Attributes
 import matt.http.connection.HTTPConnectionProblemNoResponse
 import matt.http.connection.HTTPConnectionProblemWithMultipleRequests
 import matt.http.connection.HTTPConnectionProblemWithResponse
 import matt.http.connection.SingleHTTPConnectResult
 import matt.model.code.errreport.infoString
+import matt.prim.str.english.maybePlural
 import matt.prim.str.joinWithNewLines
-import matt.prim.str.maybePlural
 import kotlin.time.Duration
 
 

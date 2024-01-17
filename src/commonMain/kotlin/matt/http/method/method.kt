@@ -1,6 +1,6 @@
 package matt.http.method
 
-import io.ktor.http.*
+import io.ktor.http.HttpMethod
 
 fun HttpMethod.toMyHttpMethod() = HTTPMethod.valueOf(this.value)
 

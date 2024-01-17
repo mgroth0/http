@@ -1,8 +1,10 @@
 package matt.http.json
 
-import io.ktor.http.*
-import io.ktor.http.ContentType.*
-import io.ktor.utils.io.charsets.*
+import io.ktor.http.ContentType.Application
+import io.ktor.http.ContentType.Text
+import io.ktor.http.withCharset
+import io.ktor.utils.io.charsets.Charsets
+import io.ktor.utils.io.charsets.name
 import matt.http.connection.HTTPConnectResult
 import matt.http.connection.requireSuccessful
 import matt.json.parse

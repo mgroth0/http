@@ -2,8 +2,8 @@
 
 package matt.http.lib
 
-import io.ktor.client.engine.*
-import io.ktor.client.engine.java.*
+import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.engine.java.Java
 import java.net.http.HttpClient.Version.HTTP_2
 
 

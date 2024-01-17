@@ -1,7 +1,7 @@
 package matt.http.report
 
-import io.ktor.http.*
-import io.ktor.util.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.util.Attributes
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

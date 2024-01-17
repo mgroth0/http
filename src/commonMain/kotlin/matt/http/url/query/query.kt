@@ -1,6 +1,6 @@
 package matt.http.url.query
 
-import io.ktor.http.*
+import io.ktor.http.URLProtocol
 import matt.collect.map.filterOutNullValues
 import matt.http.url.MURL
 import matt.lang.delegation.provider

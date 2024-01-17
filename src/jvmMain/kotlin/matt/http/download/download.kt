@@ -1,17 +1,17 @@
 package matt.http.download
 
-import matt.file.JioFile
 import matt.lang.err
 import matt.lang.file.toJFile
+import matt.lang.model.file.FsFile
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 
-fun java.net.URL.download(file: JioFile) {
-    if (file.exists()) {
+fun java.net.URL.download(file: FsFile) {
+    if (file.toJFile().exists()) {
         err("do I want to overwrite?")
     }
-    file.parentFile!!.mkdirs()
+    file.parentFile!!.toJFile().mkdirs()
 
 
     val inputStream: InputStream = openStream()

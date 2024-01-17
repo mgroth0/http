@@ -3,14 +3,14 @@
 package matt.http.lib
 
 //import io.ktor.client.engine.java.*
-import io.ktor.client.content.*
-import io.ktor.http.content.*
-import io.ktor.utils.io.*
-import io.ktor.utils.io.jvm.javaio.*
-import matt.lang.model.file.FsFile
+import io.ktor.client.content.LocalFileContent
+import io.ktor.http.content.OutgoingContent
+import io.ktor.utils.io.ByteWriteChannel
+import io.ktor.utils.io.jvm.javaio.copyTo
 import matt.http.req.write.DuringConnectionWriter
 import matt.lang.anno.SeeURL
 import matt.lang.file.toJFile
+import matt.lang.model.file.FsFile
 import java.io.InputStream
 
 //

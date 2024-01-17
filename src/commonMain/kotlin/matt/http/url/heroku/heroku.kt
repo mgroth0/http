@@ -1,6 +1,6 @@
 package matt.http.url.heroku
 
-import io.ktor.http.*
+import io.ktor.http.headers
 import kotlinx.serialization.Serializable
 import matt.http.api.APIWithConfiguredHeaders
 import matt.http.headers.HTTPHeaders

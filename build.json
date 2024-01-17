@@ -16,9 +16,8 @@
     {
       "type": "Project",
       "cfg": "commonMainApi",
-      "path": ":k:file"
+      "path": ":k:collect"
     },
-
     {
       "type": "Project",
       "cfg": "commonMainApi",
@@ -47,7 +46,7 @@
     {
       "type": "Lib",
       "cfg": "androidMainImplementation",
-      "key": "ktorClientAndroid"
+      "key": "ktorClientOkHttp"
     },
     {
       "type": "Project",
@@ -64,6 +63,5 @@
       "cfg": "commonTestImplementation",
       "key": "kotlinx-coroutines-test"
     }
-  ],
-  "note": "plugin above is false because of a small but extremely annoying and impossible warning: \"Configuration 'jsNpmAggregated' was resolved during configuration time.\"... and maybe the plugin isn't even neccesary for libraries anyway"
+  ]
 }

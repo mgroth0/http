@@ -2,11 +2,14 @@ package matt.http.url.req
 
 import matt.http.http
 import matt.http.lib.RequiresCookiesException
-import matt.http.url.valid.ValidURLTests.Companion.GOOGLE
+import matt.http.url.valid.ValidURLTests
 import matt.test.co.runTestWithTimeoutOnlyIfTestingPerformance
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.parallel.Execution
+import org.junit.jupiter.api.parallel.ExecutionMode.CONCURRENT
 import kotlin.test.Test
 
+@Execution(CONCURRENT)
 class HttpRequests {
 
     companion object {
@@ -22,7 +25,7 @@ class HttpRequests {
 
     @Test
     fun google() = runTestWithTimeoutOnlyIfTestingPerformance {
-        http(GOOGLE)
+        http(ValidURLTests.GOOGLE)
     }
 
 

@@ -1,5 +1,3 @@
 package matt.http
 
-class HttpJsTests {
-
-}
+class HttpJsTests

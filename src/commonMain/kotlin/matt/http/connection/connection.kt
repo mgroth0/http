@@ -1,10 +1,16 @@
 package matt.http.connection
 
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.util.*
-import io.ktor.utils.io.*
-import io.ktor.utils.io.errors.*
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsChannel
+import io.ktor.client.statement.readBytes
+import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpProtocolVersion
+import io.ktor.http.HttpStatusCode
+import io.ktor.util.Attributes
+import io.ktor.utils.io.errors.IOException
+import io.ktor.utils.io.readUTF8Line
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import matt.http.report.HTTPResponseReport
@@ -36,7 +42,6 @@ sealed class HTTPConnectionProblem(
     HTTPConnectResult
 
 
-
 abstract class HTTPConnectionProblemWithMultipleRequests(
     uri: String,
     message: String,
@@ -50,7 +55,7 @@ abstract class HTTPConnectionProblemNoResponse(
     message: String,
     override val requestAttributes: Attributes,
     cause: Throwable? = null
-) : HTTPConnectionProblem(uri=uri,message=message,cause=cause),
+) : HTTPConnectionProblem(uri = uri, message = message, cause = cause),
     SingleHTTPConnectResult
 
 abstract class HTTPConnectionProblemWithResponse(
@@ -96,12 +101,27 @@ class HTTPConnection(
     private var alreadyGotHTTPStatusCode: HttpStatusCode? = null
     private val statusMutex = Mutex()
 
+
+    private var alreadyGotProtocol: HttpProtocolVersion? = null
+    private val protocolMutex = Mutex()
+
+
     suspend fun statusCode(): HttpStatusCode {
         statusMutex.withLock {
             if (alreadyGotHTTPStatusCode == null) {
                 alreadyGotHTTPStatusCode = response.status
             }
             return alreadyGotHTTPStatusCode!!
+        }
+    }
+
+
+    suspend fun protocol(): HttpProtocolVersion {
+        protocolMutex.withLock {
+            if (alreadyGotProtocol == null) {
+                alreadyGotProtocol = response.version
+            }
+            return alreadyGotProtocol!!
         }
     }
 

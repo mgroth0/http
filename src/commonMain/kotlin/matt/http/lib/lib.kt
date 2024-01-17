@@ -1,12 +1,17 @@
 package matt.http.lib
 
-import io.ktor.client.engine.*
-import io.ktor.client.plugins.*
-import io.ktor.client.request.*
-import io.ktor.client.utils.*
-import io.ktor.http.*
-import io.ktor.http.content.*
-import io.ktor.util.*
+import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.timeout
+import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.headers
+import io.ktor.client.request.request
+import io.ktor.client.request.url
+import io.ktor.client.utils.EmptyContent
+import io.ktor.http.HttpMethod
+import io.ktor.http.content.ByteArrayContent
+import io.ktor.http.content.OutgoingContent
+import io.ktor.utils.io.InternalAPI
 import matt.http.connection.HTTPConnection
 import matt.http.connection.SingleHTTPConnectResult
 import matt.http.method.HTTPMethod
