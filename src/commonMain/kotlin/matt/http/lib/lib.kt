@@ -30,8 +30,8 @@ val REQUIRES_COOKIES = listOf(
 
 expect val httpClientEngine: HttpClientEngine
 
-interface MyHttpRequestBuilderInter {
-    val builder: HttpRequestBuilder
+abstract class MyHttpRequestBuilderInter {
+    abstract val builder: HttpRequestBuilder
 
     fun applyHeaders(headers: List<Pair<String, String>>) {
         headers.forEach { (k, v) ->
@@ -56,11 +56,11 @@ interface MyHttpRequestBuilderInter {
     }
 }
 
-class MyPrebuiltHttpRequestBuilder(override val builder: HttpRequestBuilder) : MyHttpRequestBuilderInter
+class MyPrebuiltHttpRequestBuilder(override val builder: HttpRequestBuilder) : MyHttpRequestBuilderInter()
 
 
 @OptIn(InternalAPI::class)
-class MyNewHTTPRequestBuilder : MyHttpRequestBuilderInter {
+class MyNewHTTPRequestBuilder : MyHttpRequestBuilderInter() {
 
 
     companion object {

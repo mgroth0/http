@@ -36,7 +36,7 @@ infix fun MURL.withQueryParams(params: RawParams): MURL = query(params.toMap())
 
 @JvmName("withQueryParams3")
 infix fun MURL.withQueryParams(params: Map<String, String>): MURL {
-    return buildQueryURL(cpath, params)
+    return buildQueryURL(path, params)
 }
 
 @JvmName("buildQueryURL1")
@@ -77,7 +77,7 @@ fun buildQueryURL(
 }
 
 
-fun MURL.withFragment(fragment: String) = buildFragmentURL(cpath,fragment)
+fun MURL.withFragment(fragment: String) = buildFragmentURL(path,fragment)
 
 fun buildFragmentURL(
     mainURL: String,
@@ -90,40 +90,40 @@ fun buildFragmentURL(
 
 
 fun MURL.withPort(port: Int): MURL {
-    if (":" in cpath) {
+    if (":" in path) {
         error("not ready if already has port")
     }
-    return MURL(cpath.substringBefore("/") + ":" + port.toString() + "/" + cpath.substringAfter("/"))
+    return MURL(path.substringBefore("/") + ":" + port.toString() + "/" + path.substringAfter("/"))
 }
 
 
 private const val PROTOCOL_DELIMITER = "://"
 
 fun MURL.withProtocol(protocol: URLProtocol): MURL {
-    return if (PROTOCOL_DELIMITER in cpath) {
-        MURL(protocol.name + PROTOCOL_DELIMITER + cpath.substringAfter(PROTOCOL_DELIMITER))
+    return if (PROTOCOL_DELIMITER in path) {
+        MURL(protocol.name + PROTOCOL_DELIMITER + path.substringAfter(PROTOCOL_DELIMITER))
     } else {
-        MURL(protocol.name + PROTOCOL_DELIMITER + cpath)
+        MURL(protocol.name + PROTOCOL_DELIMITER + path)
     }
 }
 
 
 abstract class QueryParams : Query {
 
-    override val params = mutableListOf<Param<*>>()
+    final override val params = mutableListOf<Param<*>>()
 
     open inner class Param<T : Any>(
-        override val name: String,
+        final override val name: String,
         converter: StringListConverter<T>
     ) : QueryParam {
         private val realConverter = converter.emptyIsNull()
-        override var value: StringList = emptyList()
+        final override var value: StringList = emptyList()
         val convertedValue get() = realConverter.fromStringList(value)
         fun setFrom(newValue: T?) {
             value = realConverter.toStringList(newValue)
         }
 
-        override fun toString(): String {
+        final override fun toString(): String {
             return "${this::class.simpleName}[name=$name,size=${value.size},value=${value.elementsToString()}]"
         }
     }
@@ -149,13 +149,13 @@ abstract class QueryParams : Query {
         param(StringListConverter.fromStringConverterAsSingular(converter))
 
 
-    override fun toMap() = params.associate { it.name to it.value }.filterOutNullValues()
+    final override fun toMap() = params.associate { it.name to it.value }.filterOutNullValues()
 
-    override fun urlStringRep(): String {
-        return buildQueryURL("", toMap()).cpath
+    final override fun urlStringRep(): String {
+        return buildQueryURL("", toMap()).path
     }
 
-    override fun toString(): String {
+    final override fun toString(): String {
         return urlStringRep()
     }
 

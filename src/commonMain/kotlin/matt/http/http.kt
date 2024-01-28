@@ -4,7 +4,7 @@ import matt.http.connection.HTTPConnection
 import matt.http.req.MutableHTTPRequest
 import matt.http.req.requester.HTTPRequester
 import matt.http.url.MURL
-import matt.lang.model.file.FileOrURL
+import matt.lang.model.file.AnyResolvableFileOrUrl
 import kotlin.jvm.JvmName
 
 
@@ -13,7 +13,7 @@ annotation class HTTPDslMarker
 
 @JvmName("http1")
 suspend fun http(
-    url: FileOrURL,
+    url: AnyResolvableFileOrUrl,
     requester: HTTPRequester = HTTPRequester.DEFAULT,
     op: MutableHTTPRequest.() -> Unit = {}
 ) = url.http(op = op, requester = requester)
@@ -24,14 +24,14 @@ suspend fun http(
     op: MutableHTTPRequest.() -> Unit = {}
 ) = MURL(url).http(op = op, requester = requester)
 
-suspend fun FileOrURL.http(
+suspend fun AnyResolvableFileOrUrl.http(
     requester: HTTPRequester = HTTPRequester.DEFAULT,
     op: MutableHTTPRequest.() -> Unit = {},
 ): HTTPConnection {
 
 
     val req = MutableHTTPRequest()
-    req.url = this.cpath
+    req.url = this.path
     req.op()
     val snap = req.snapshot()
     return requester.copy(request = snap).sendAndThrowUnlessConnectedCorrectly()

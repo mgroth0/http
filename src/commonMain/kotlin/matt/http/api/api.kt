@@ -1,15 +1,23 @@
 package matt.http.api
 
+import io.ktor.http.headers
 import matt.http.connection.HTTPConnection
 import matt.http.headers.HTTPHeaders
+import matt.http.headers.auth.AuthHeader
 import matt.http.headers.headers
 import matt.http.http
 import matt.http.req.MutableHTTPRequest
 import matt.http.url.MURL
 import matt.lang.jpy.ExcludeFromPython
 
-fun MURL.asAPI() = SimpleAPI(this)
-class SimpleAPI(override val urlPrefix: MURL) : APIWithConfiguredHeaders
+fun MURL.asAPI(
+    auths: Map<String, AuthHeader> = mapOf()
+) = SimpleAPI(this, auths = auths)
+
+class SimpleAPI(
+    override val urlPrefix: MURL,
+    auths: Map<String, AuthHeader> = mapOf()
+) : AuthenticatedApi(auths = auths)
 
 interface API {
     @ExcludeFromPython
@@ -21,16 +29,16 @@ interface API {
 
 }
 
-interface APIWithConfiguredHeaders : API {
+abstract class APIWithConfiguredHeaders : API {
 
     @ExcludeFromPython
-    val urlPrefix: MURL
+    abstract val urlPrefix: MURL
 
     @ExcludeFromPython
-    val defaultHeaders: (HTTPHeaders.() -> Unit)? get() = null
+    abstract val defaultHeaders: (HTTPHeaders.() -> Unit)?
 
     @ExcludeFromPython
-    override suspend fun http(
+    final override suspend fun http(
         url: String,
         op: MutableHTTPRequest.() -> Unit
     ) = urlPrefix.resolve(url).http {
@@ -39,11 +47,21 @@ interface APIWithConfiguredHeaders : API {
         }
         op()
     }
-
-
 }
 
-abstract class ConfiguredApi : APIWithConfiguredHeaders {
+abstract class AuthenticatedApi(
+    auths: Map<String, AuthHeader> = mapOf()
+) : APIWithConfiguredHeaders() {
+    final override val defaultHeaders: (HTTPHeaders.() -> Unit) = {
+        headers {
+            auths.forEach {
+                setMySpecialBearerAuth(it.key, it.value)
+            }
+        }
+    }
+}
+
+abstract class ConfiguredApi : APIWithConfiguredHeaders() {
     @ExcludeFromPython
     protected abstract val parentApi: APIWithConfiguredHeaders
 
@@ -63,7 +81,7 @@ abstract class ConfiguredApi : APIWithConfiguredHeaders {
 
 }
 
-abstract class SubApi(val path: String) : APIWithConfiguredHeaders {
+abstract class SubApi(val path: String) : APIWithConfiguredHeaders() {
     @ExcludeFromPython
     protected abstract val parentApi: APIWithConfiguredHeaders
 

@@ -45,7 +45,7 @@ sealed class HTTPConnectionProblem(
 abstract class HTTPConnectionProblemWithMultipleRequests(
     uri: String,
     message: String,
-    override val requestAttributes: List<Attributes>,
+    final override val requestAttributes: List<Attributes>,
     cause: Throwable? = null,
 ) : IOException("$uri: $message", cause),
     HTTPConnectResult, MultipleHTTPConnectResult
@@ -53,13 +53,13 @@ abstract class HTTPConnectionProblemWithMultipleRequests(
 abstract class HTTPConnectionProblemNoResponse(
     uri: String,
     message: String,
-    override val requestAttributes: Attributes,
+    final override val requestAttributes: Attributes,
     cause: Throwable? = null
 ) : HTTPConnectionProblem(uri = uri, message = message, cause = cause),
     SingleHTTPConnectResult
 
 abstract class HTTPConnectionProblemWithResponse(
-    override val requestAttributes: Attributes,
+    final override val requestAttributes: Attributes,
     uri: String,
     message: String,
     cause: Throwable? = null,
@@ -95,7 +95,9 @@ class HTTPConnection(
     }
 
     suspend fun text(): String {
-        return bytes().decodeToString()
+        val b = bytes()
+        val r = b.decodeToString()
+        return r
     }
 
     private var alreadyGotHTTPStatusCode: HttpStatusCode? = null

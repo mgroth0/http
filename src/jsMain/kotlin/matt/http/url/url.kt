@@ -5,19 +5,17 @@ import org.w3c.dom.url.URL
 
 external fun decodeURIComponent(encodedURI: String): String
 
-actual class MURL actual constructor(path: String) : CommonUrl, UrlResolver {
-
-    actual override val cpath = path
+actual class MURL actual constructor(actual override val path: String) : CommonUrl<MURL>, UrlResolver<MURL> {
 
     private val jsURL by lazy { URL(path) }
 
     actual val protocol: String get() = jsURL.protocol
 
     actual override fun resolve(other: String) = MURL(
-        cpath.removeSuffix(CommonUrl.URL_SEP) + CommonUrl.URL_SEP + other.removePrefix(CommonUrl.URL_SEP)
+        path.removeSuffix(CommonUrl.URL_SEP) + CommonUrl.URL_SEP + other.removePrefix(CommonUrl.URL_SEP)
     )
 
-    actual override fun toString() = cpath
+    actual override fun toString() = path
 
     /*private val requester by lazy { HTTPRequester(type = GET, this) { responseText } }*/
 

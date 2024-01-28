@@ -6,7 +6,7 @@ import matt.http.req.MutableHTTPRequest
 import matt.http.url.MURL
 
 abstract class ThisHostBase(): API {
-    override suspend fun http(
+    final override suspend fun http(
         url: String,
         op: MutableHTTPRequest.() -> Unit
     ): HTTPConnection = MURL(url).http(op = op)

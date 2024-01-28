@@ -36,7 +36,7 @@ abstract class ErrorCheckingInterceptor(
 ) : HttpConnectionInterceptor {
 
 
-    override suspend fun intercept(
+    final override suspend fun intercept(
         request: ImmutableHTTPRequest,
         connection: SingleHTTPConnectResult
     ): SingleHTTPConnectResult {

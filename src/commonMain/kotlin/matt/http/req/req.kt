@@ -50,7 +50,7 @@ open class MutableHeaders : HasHeaders {
         headerList += key to value
     }
 
-    override fun headersSnapshot() = headerList.toList()
+    final override fun headersSnapshot() = headerList.toList()
 }
 
 
@@ -108,11 +108,11 @@ class MutableHTTPRequest : MutableHeaders(), HTTPRequest {
         value: String
     ) {
         val murl = MURL(url)
-        url = murl.withQueryParams(mapOf(key to value)).cpath
+        url = murl.withQueryParams(mapOf(key to value)).path
     }
 
     fun port(p: Int) {
-        url = MURL(url).withPort(p).cpath
+        url = MURL(url).withPort(p).path
     }
 
 }

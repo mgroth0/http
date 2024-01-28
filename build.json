@@ -16,6 +16,11 @@
     {
       "type": "Project",
       "cfg": "commonMainApi",
+      "path": ":k:lang"
+    },
+    {
+      "type": "Project",
+      "cfg": "commonMainApi",
       "path": ":k:collect"
     },
     {
@@ -62,6 +67,11 @@
       "type": "Lib",
       "cfg": "commonTestImplementation",
       "key": "kotlinx-coroutines-test"
+    },
+    {
+      "type": "Lib",
+      "cfg": "androidInstrumentedTestImplementation",
+      "key": "androidx-test-runner"
     }
   ]
 }

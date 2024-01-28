@@ -10,7 +10,7 @@ import io.ktor.utils.io.jvm.javaio.copyTo
 import matt.http.req.write.DuringConnectionWriter
 import matt.lang.anno.SeeURL
 import matt.lang.file.toJFile
-import matt.lang.model.file.FsFile
+import matt.lang.model.file.AnyFsFile
 import java.io.InputStream
 
 //
@@ -40,4 +40,4 @@ class StreamContent(private val stream: InputStream) : OutgoingContent.WriteChan
 
 sealed interface JDuringConnectionWriter : DuringConnectionWriter
 class StreamBodyWriter(val stream: InputStream) : JDuringConnectionWriter
-class FileBodyWriter(val file: FsFile) : JDuringConnectionWriter
+class FileBodyWriter(val file: AnyFsFile) : JDuringConnectionWriter
