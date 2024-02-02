@@ -38,3 +38,6 @@ suspend fun AnyResolvableFileOrUrl.http(
 }
 
 
+
+/*fail fast instead of hanging!*/
+const val FAIL_SELENIUM_ID = "FAIL_SELENIUM_ID"

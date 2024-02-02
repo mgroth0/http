@@ -6,4 +6,4 @@ fun rawS3Url(
     bucket: String,
     path: String,
     region: String? = null
-): MURL = MURL("https://${bucket}.s3${region?.let { ".$it" } ?: ""}.amazonaws.com/${path}")
+): MURL = MURL("https://$bucket.s3${region?.let { ".$it" } ?: ""}.amazonaws.com/$path")

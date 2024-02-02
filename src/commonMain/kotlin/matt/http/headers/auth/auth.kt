@@ -22,15 +22,11 @@ fun basicAuth(
 
 
 object BearerConverter : StringConverter<AuthHeader> {
-    override fun toString(t: AuthHeader): String {
-        return arrayOf(t.authType.name, t.token).joinWithSpaces()
-    }
+    override fun toString(t: AuthHeader): String = arrayOf(t.authType.name, t.token).joinWithSpaces()
 
-    override fun fromString(s: String): AuthHeader {
-        return AuthHeader(
-            authType = AuthType.valueOf(s.substringBefore(' ').trim()),
-            token = s.substringAfter(' ').trim()
-        )
-    }
+    override fun fromString(s: String): AuthHeader = AuthHeader(
+        authType = AuthType.valueOf(s.substringBefore(' ').trim()),
+        token = s.substringAfter(' ').trim()
+    )
 
 }

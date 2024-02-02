@@ -24,28 +24,28 @@ sealed class TooMuchRetryingException(
     attempts: List<HTTPRequestAttempt>,
     problems: List<Exception>
 ) : HTTPConnectionProblemWithMultipleRequests(uri = uri,
-    "No successful connection after ${attempts.size} ${
-        maybePlural(
-            attempts.size, "attempt"
-        )
-    }\n${attempts.joinWithNewLines { "\t${it.tSent}-${it.tGotResult}\t${it.result}" }}\n\n\n" + problems.joinWithNewLines { it.infoString() },
-    requestAttributes = attempts.map { it.result.requestAttributes })
+        "No successful connection after ${attempts.size} ${
+            maybePlural(
+                attempts.size, "attempt"
+            )
+        }\n${attempts.joinWithNewLines { "\t${it.tSent}-${it.tGotResult}\t${it.result}" }}\n\n\n" + problems.joinWithNewLines { it.infoString() },
+        requestAttributes = attempts.map { it.result.requestAttributes })
 
 class TooManyRetrysException(
     uri: String,
     attempts: List<HTTPRequestAttempt>,
     problems: List<Exception>
 ) : TooMuchRetryingException(
-    uri = uri, attempts, problems
-)
+        uri = uri, attempts, problems
+    )
 
 class TriedForTooLongException(
     uri: String,
     attempts: List<HTTPRequestAttempt>,
     problems: List<Exception>
 ) : TooMuchRetryingException(
-    uri = uri, attempts, problems
-)
+        uri = uri, attempts, problems
+    )
 
 sealed class NoConnectionException(
     uri: String,
@@ -53,19 +53,19 @@ sealed class NoConnectionException(
     requestAttributes: Attributes,
     cause: Throwable? = null
 ) : HTTPConnectionProblemNoResponse(
-    uri = uri, "No Connection: $message", cause = cause, requestAttributes = requestAttributes
-)
+        uri = uri, "No Connection: $message", cause = cause, requestAttributes = requestAttributes
+    )
 
 class HTTPExceptionWhileCreatingConnection(
     uri: String,
     cause: Exception,
     requestAttributes: Attributes,
 ) : NoConnectionException(
-    uri = uri,
-    "Exception while creating connection: ${cause}: ${cause.message}",
-    cause = cause,
-    requestAttributes = requestAttributes
-)
+        uri = uri,
+        "Exception while creating connection: $cause: ${cause.message}",
+        cause = cause,
+        requestAttributes = requestAttributes
+    )
 
 class HTTPTimeoutException(
     uri: String,
@@ -81,13 +81,13 @@ sealed class HTTPBadConnectionException(
     responseBody: String,
     requestAttributes: Attributes
 ) : HTTPConnectionProblemWithResponse(
-    uri = uri,
-    message = "$status: $message",
-    status = status,
-    headers = headers,
-    responseBody = responseBody,
-    requestAttributes = requestAttributes
-) {
+        uri = uri,
+        message = "$status: $message",
+        status = status,
+        headers = headers,
+        responseBody = responseBody,
+        requestAttributes = requestAttributes
+    ) {
     constructor(exceptionData: HttpExceptionData) : this(
         uri = exceptionData.uri,
         status = exceptionData.status,
@@ -149,8 +149,8 @@ class NotFoundException(
 class UnsupportedMediaType(
     exceptionData: HttpExceptionData
 ) : ClientErrorException(
-    exceptionData.copy(message = "Unsupported Media Type (415): ${exceptionData.uri}: ${exceptionData.message}")
-)
+        exceptionData.copy(message = "Unsupported Media Type (415): ${exceptionData.uri}: ${exceptionData.message}")
+    )
 
 
 class UnauthorizedException(
@@ -164,5 +164,5 @@ open class ServerErrorException(
 class ServiceUnavailableException(
     exceptionData: HttpExceptionData
 ) : ServerErrorException(
-    exceptionData.also { require(it.status == HttpStatusCode.ServiceUnavailable) }
-)
+        exceptionData.also { require(it.status == HttpStatusCode.ServiceUnavailable) }
+    )

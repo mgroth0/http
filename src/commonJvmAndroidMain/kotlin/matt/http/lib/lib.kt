@@ -22,11 +22,9 @@ import java.io.InputStream
 //}
 
 
-actual fun figureOutLiveContentWriter(bodyWriter: DuringConnectionWriter): OutgoingContent {
-    return when (val jWriter = (bodyWriter as JDuringConnectionWriter)) {
-        is StreamBodyWriter -> StreamContent(jWriter.stream)
-        is FileBodyWriter   -> LocalFileContent(jWriter.file.toJFile())
-    }
+actual fun figureOutLiveContentWriter(bodyWriter: DuringConnectionWriter): OutgoingContent = when (val jWriter = (bodyWriter as JDuringConnectionWriter)) {
+    is StreamBodyWriter -> StreamContent(jWriter.stream)
+    is FileBodyWriter   -> LocalFileContent(jWriter.file.toJFile())
 }
 
 

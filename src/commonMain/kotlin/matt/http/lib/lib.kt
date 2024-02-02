@@ -88,28 +88,24 @@ class MyNewHTTPRequestBuilder : MyHttpRequestBuilderInter() {
     }
 
 
-    suspend fun send(): SingleHTTPConnectResult {
-        return try {
-            val con = client.request(builder)
-            HTTPConnection(builder.attributes, con)
-        } catch (e: Exception) {
-            HTTPExceptionWhileCreatingConnection(
-                uri = builder.url.toString(),
-                cause = e,
-                requestAttributes = builder.attributes
-            )
-        }
+    suspend fun send(): SingleHTTPConnectResult = try {
+        val con = client.request(builder)
+        HTTPConnection(builder.attributes, con)
+    } catch (e: Exception) {
+        HTTPExceptionWhileCreatingConnection(
+            uri = builder.url.toString(),
+            cause = e,
+            requestAttributes = builder.attributes
+        )
     }
 
 
 }
 
-fun figureOutContentWriter(bodyWriter: BodyWriter): OutgoingContent {
-    return when (bodyWriter) {
-        NoBody                    -> EmptyContent
-        is BytesBodyWriter        -> ByteArrayContent(bodyWriter.bytes)
-        is DuringConnectionWriter -> figureOutLiveContentWriter(bodyWriter)
-    }
+fun figureOutContentWriter(bodyWriter: BodyWriter): OutgoingContent = when (bodyWriter) {
+    NoBody                    -> EmptyContent
+    is BytesBodyWriter        -> ByteArrayContent(bodyWriter.bytes)
+    is DuringConnectionWriter -> figureOutLiveContentWriter(bodyWriter)
 }
 
 expect fun figureOutLiveContentWriter(bodyWriter: DuringConnectionWriter): OutgoingContent

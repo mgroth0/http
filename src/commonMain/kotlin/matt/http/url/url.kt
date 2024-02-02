@@ -3,8 +3,8 @@ package matt.http.url
 
 import matt.http.url.valid.isValidHttpUrl
 import matt.lang.model.file.AnyResolvableFileOrUrl
-import matt.lang.model.file.ResolvableFileOrUrl
 import matt.lang.model.file.FileOrUrlResolver
+import matt.lang.model.file.ResolvableFileOrUrl
 import matt.lang.model.file.UnsafeFilePath
 
 interface CommonUrl<U: CommonUrl<U>> : ResolvableFileOrUrl<U> {
@@ -50,6 +50,4 @@ val EXAMPLE_MURL by lazy {
     MURL("https://example.com/")
 }
 
-fun fileOrURL(s: String): AnyResolvableFileOrUrl {
-    return if (s.isValidHttpUrl()) MURL(s) else UnsafeFilePath(s)
-}
+fun fileOrURL(s: String): AnyResolvableFileOrUrl = if (s.isValidHttpUrl()) MURL(s) else UnsafeFilePath(s)

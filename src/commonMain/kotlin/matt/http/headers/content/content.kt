@@ -15,15 +15,11 @@ enum class HTTPMediaType(val string: String? = null) {
 }
 
 object HTTPContentTypeConverter : StringConverter<HTTPMediaType> {
-    override fun toString(t: HTTPMediaType): String {
-        return t.asString()
-    }
+    override fun toString(t: HTTPMediaType): String = t.asString()
 
-    override fun fromString(s: String): HTTPMediaType {
-        return HTTPMediaType.entries.firstOrNull {
-            it.asString() == s
-        } ?: error("could not find content type \"$s\"")
-    }
+    override fun fromString(s: String): HTTPMediaType = HTTPMediaType.entries.firstOrNull {
+        it.asString() == s
+    } ?: error("could not find content type \"$s\"")
 
 }
 

@@ -26,4 +26,4 @@ fun TheInternet.isNotAvailable() = not(isAvailable())
 
 
 /*not https*/
-fun LOCAL_TEST_URL(port: Int) = MURL("http://0.0.0.0:${port}")
+fun LOCAL_TEST_URL(port: Int) = MURL("http://0.0.0.0:$port")

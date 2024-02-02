@@ -10,15 +10,15 @@ import java.net.URL
 
 
 suspend fun http(
-  url: URI,
-  requester: HTTPRequester = HTTPRequester.DEFAULT,
-  op: MutableHTTPRequest.()->Unit = {}
+    url: URI,
+    requester: HTTPRequester = HTTPRequester.DEFAULT,
+    op: MutableHTTPRequest.()->Unit = {}
 ) = MURL(url).http(op=op,requester=requester)
 
 suspend fun http(
-  url: URL,
-  requester: HTTPRequester = HTTPRequester.DEFAULT,
-  op: MutableHTTPRequest.()->Unit = {}
+    url: URL,
+    requester: HTTPRequester = HTTPRequester.DEFAULT,
+    op: MutableHTTPRequest.()->Unit = {}
 ) = MURL(url).http(requester = requester, op)
 
 

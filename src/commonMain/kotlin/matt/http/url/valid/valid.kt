@@ -5,23 +5,17 @@ import matt.lang.anno.SupportedByChatGPT
 import matt.prim.str.truncateWithElipses
 import kotlin.jvm.JvmInline
 
-fun String.isValidHttpUrl(): Boolean {
-
-    return try {
-        ValidatingHTTPURL(this)
-        true
-    } catch (e: MalformedURLException) {
-        false
-    }
-
+fun String.isValidHttpUrl(): Boolean = try {
+    ValidatingHTTPURL(this)
+    true
+} catch (e: MalformedURLException) {
+    false
 }
 
-fun String.tryValidatingURL(): ValidHTTPURL? {
-    return try {
-        ValidatingHTTPURL(this)
-    } catch (e: MalformedURLException) {
-        null
-    }
+fun String.tryValidatingURL(): ValidHTTPURL? = try {
+    ValidatingHTTPURL(this)
+} catch (e: MalformedURLException) {
+    null
 }
 
 
@@ -52,7 +46,7 @@ value class ValidatingHTTPURL(override val url: String) : ValidHTTPURL {
         @SupportedByChatGPT
         private val REGEX = Regex(
             pattern =
-            """^https?://(?:[-\w.]|%[\da-fA-F]{2})+/(?:[-\w./${if (ALLOW_PARENTHESIS) "()" else ""}${if (ALLOW_HASHES) "#" else ""}?%&=]*)?$"""
+                """^https?://(?:[-\w.]|%[\da-fA-F]{2})+/(?:[-\w./${if (ALLOW_PARENTHESIS) "()" else ""}${if (ALLOW_HASHES) "#" else ""}?%&=]*)?$"""
         )
     }
 

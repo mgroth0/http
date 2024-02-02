@@ -123,9 +123,7 @@ data class ImmutableHTTPRequest(
     val headers: List<Pair<String, String>>,
     override val bodyWriter: BodyWriter
 ) : HTTPRequest {
-    override fun headersSnapshot(): List<Pair<String, String>> {
-        return headers
-    }
+    override fun headersSnapshot(): List<Pair<String, String>> = headers
 
     override fun snapshot() = this
 }

@@ -39,16 +39,14 @@ abstract class ErrorCheckingInterceptor(
     final override suspend fun intercept(
         request: ImmutableHTTPRequest,
         connection: SingleHTTPConnectResult
-    ): SingleHTTPConnectResult {
-        return when (connection) {
-            is HTTPConnection                    -> {
-                interceptConnection(request, connection)
-            }
-
-            is HTTPConnectionProblem             -> reportAndThrowConnectionProblem(connection, request)
-            is HTTPConnectionProblemWithResponse -> reportAndThrowConnectionProblem(connection, request)
-            is HTTPConnectionProblemNoResponse   -> reportAndThrowConnectionProblem(connection, request)
+    ): SingleHTTPConnectResult = when (connection) {
+        is HTTPConnection                    -> {
+            interceptConnection(request, connection)
         }
+
+        is HTTPConnectionProblem             -> reportAndThrowConnectionProblem(connection, request)
+        is HTTPConnectionProblemWithResponse -> reportAndThrowConnectionProblem(connection, request)
+        is HTTPConnectionProblemNoResponse   -> reportAndThrowConnectionProblem(connection, request)
     }
 
     private fun reportAndThrowConnectionProblem(

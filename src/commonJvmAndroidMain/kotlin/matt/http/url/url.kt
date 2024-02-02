@@ -15,9 +15,7 @@ actual class MURL actual constructor(actual override val path: String) : CommonU
     constructor(uri: URI) : this(uri.toString())
     constructor(url: URL) : this(url.toString())
 
-    override fun toJavaURI(): URI {
-        return URI(path)
-    }
+    override fun toJavaURI(): URI = URI(path)
 
     val jURL: URL by lazy { toJavaURI().toURL() }
 

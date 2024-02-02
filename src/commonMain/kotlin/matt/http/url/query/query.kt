@@ -35,9 +35,7 @@ infix fun MURL.withQueryParams(params: QueryParams): MURL = query(params.toMap()
 infix fun MURL.withQueryParams(params: RawParams): MURL = query(params.toMap())
 
 @JvmName("withQueryParams3")
-infix fun MURL.withQueryParams(params: Map<String, String>): MURL {
-    return buildQueryURL(path, params)
-}
+infix fun MURL.withQueryParams(params: Map<String, String>): MURL = buildQueryURL(path, params)
 
 @JvmName("buildQueryURL1")
 fun buildQueryURL(
@@ -49,9 +47,7 @@ fun buildQueryURL(
 fun buildQueryURL(
     mainURL: String,
     params: Map<String, String>
-): MURL {
-    return buildQueryURL(mainURL, params.entries.associate { it.key to it.value.inList() })
-}
+): MURL = buildQueryURL(mainURL, params.entries.associate { it.key to it.value.inList() })
 
 @JvmName("buildQueryURL3")
 fun buildQueryURL(
@@ -99,12 +95,10 @@ fun MURL.withPort(port: Int): MURL {
 
 private const val PROTOCOL_DELIMITER = "://"
 
-fun MURL.withProtocol(protocol: URLProtocol): MURL {
-    return if (PROTOCOL_DELIMITER in path) {
-        MURL(protocol.name + PROTOCOL_DELIMITER + path.substringAfter(PROTOCOL_DELIMITER))
-    } else {
-        MURL(protocol.name + PROTOCOL_DELIMITER + path)
-    }
+fun MURL.withProtocol(protocol: URLProtocol): MURL = if (PROTOCOL_DELIMITER in path) {
+    MURL(protocol.name + PROTOCOL_DELIMITER + path.substringAfter(PROTOCOL_DELIMITER))
+} else {
+    MURL(protocol.name + PROTOCOL_DELIMITER + path)
 }
 
 
@@ -123,9 +117,7 @@ abstract class QueryParams : Query {
             value = realConverter.toStringList(newValue)
         }
 
-        final override fun toString(): String {
-            return "${this::class.simpleName}[name=$name,size=${value.size},value=${value.elementsToString()}]"
-        }
+        final override fun toString(): String = "${this::class.simpleName}[name=$name,size=${value.size},value=${value.elementsToString()}]"
     }
 
 
@@ -151,13 +143,9 @@ abstract class QueryParams : Query {
 
     final override fun toMap() = params.associate { it.name to it.value }.filterOutNullValues()
 
-    final override fun urlStringRep(): String {
-        return buildQueryURL("", toMap()).path
-    }
+    final override fun urlStringRep(): String = buildQueryURL("", toMap()).path
 
-    final override fun toString(): String {
-        return urlStringRep()
-    }
+    final override fun toString(): String = urlStringRep()
 
 
 }

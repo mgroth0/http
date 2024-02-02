@@ -67,14 +67,14 @@ abstract class HTTPConnectionProblemWithResponse(
     headers: Headers,
     responseBody: String
 ) : HTTPConnectionProblem(uri = uri, message = lineDelimitedString {
-    +"message: $message"
-    +HTTPResponseReport(
-        status = status,
-        headers = headers.entries().toList(),
-        body = responseBody
-    ).text
+        +"message: $message"
+        +HTTPResponseReport(
+            status = status,
+            headers = headers.entries().toList(),
+            body = responseBody
+        ).text
 
-}, cause = cause), SingleHTTPConnectResult
+    }, cause = cause), SingleHTTPConnectResult
 
 class HTTPConnection(
     override val requestAttributes: Attributes,

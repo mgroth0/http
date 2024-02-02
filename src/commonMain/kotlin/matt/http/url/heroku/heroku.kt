@@ -16,7 +16,5 @@ class AnApiForMyHerokuApp(
 ) : AuthenticatedApi(auths=auths) {
     override val urlPrefix = MURL(url.url)/*herokuAbsoluteHostName(absoluteAppName)*/
 
-    override fun toString(): String {
-        return "API for Heroku App: $urlPrefix"
-    }
+    override fun toString(): String = "API for Heroku App: $urlPrefix"
 }
