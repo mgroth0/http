@@ -19,9 +19,9 @@ import matt.http.req.requester.problems.UnauthorizedException
 import matt.http.req.requester.problems.UnsupportedMediaType
 import matt.http.req.requester.problems.WeirdStatusCodeException
 import matt.lang.anno.SeeURL
-import matt.lang.inList
-import matt.model.code.errreport.throwReport
-import matt.time.nowKotlinDateTime
+import matt.lang.common.inList
+import matt.model.code.errreport.createThrowReport
+import matt.time.nowLocal
 
 
 interface HttpConnectionInterceptor {
@@ -39,15 +39,16 @@ abstract class ErrorCheckingInterceptor(
     final override suspend fun intercept(
         request: ImmutableHTTPRequest,
         connection: SingleHTTPConnectResult
-    ): SingleHTTPConnectResult = when (connection) {
-        is HTTPConnection                    -> {
-            interceptConnection(request, connection)
-        }
+    ): SingleHTTPConnectResult =
+        when (connection) {
+            is HTTPConnection                    -> {
+                interceptConnection(request, connection)
+            }
 
-        is HTTPConnectionProblem             -> reportAndThrowConnectionProblem(connection, request)
-        is HTTPConnectionProblemWithResponse -> reportAndThrowConnectionProblem(connection, request)
-        is HTTPConnectionProblemNoResponse   -> reportAndThrowConnectionProblem(connection, request)
-    }
+            is HTTPConnectionProblem             -> reportAndThrowConnectionProblem(connection, request)
+            is HTTPConnectionProblemWithResponse -> reportAndThrowConnectionProblem(connection, request)
+            is HTTPConnectionProblemNoResponse   -> reportAndThrowConnectionProblem(connection, request)
+        }
 
     private fun reportAndThrowConnectionProblem(
         result: HTTPConnectionProblem,
@@ -61,20 +62,31 @@ abstract class ErrorCheckingInterceptor(
         result: HTTPConnectionProblem,
         request: ImmutableHTTPRequest
     ) {
-        val date = nowKotlinDateTime()
+        val date = nowLocal()
         if (!suppressAnyErrorReport) {
-            val report = HTTPRequestReport(side = Client,
-                date = date,
-                uri = request.url,
-                method = request.method.name,
-                headers = request.headers.groupBy { it.first }.mapValues { it.value.map { it.second } },
-                attributes = when (result) {
-                    is SingleHTTPConnectResult   -> result.requestAttributes.inList()
-                    is MultipleHTTPConnectResult -> result.requestAttributes
-                },
-                parameters = mapOf() /*not sure if parameters are available from the client side*/,
-                throwReport = throwReport(result)
-            )
+            val report =
+                HTTPRequestReport(
+                    side = Client,
+                    date = date,
+                    uri = request.url,
+                    method = request.method.name,
+                    headers =
+                        request
+                            .headers.groupBy {
+                                it.key.name
+                            }.mapValues {
+                                it.value.map {
+                                    it.valueAsString
+                                }
+                            },
+                    attributes =
+                        when (result) {
+                            is SingleHTTPConnectResult   -> result.requestAttributes.inList()
+                            is MultipleHTTPConnectResult -> result.requestAttributes
+                        },
+                    parameters = mapOf() /*not sure if parameters are available from the client side*/,
+                    throwReport = createThrowReport(result)
+                )
             report.print()
         }
     }
@@ -94,58 +106,67 @@ class StatusCodeChecker(
         request: ImmutableHTTPRequest,
         connection: HTTPConnection
     ): SingleHTTPConnectResult {
-        suspend fun exceptionData() = HttpExceptionDataNoMessage(
-            uri = request.url,
-            status = connection.statusCode(),
-            headers = connection.headers(),
-            responseBody = connection.text(),
-            requestAttributes = connection.requestAttributes
-        )
-
-        val statusCodeObj = connection.statusCode()
-        val newResult = when (val statusCode = statusCodeObj.value.toShort()) {
-            in 300..399  -> {
-                RedirectionException(
-                    exceptionData().withBodyAsMessage()
-                )
-            }
-
-            in 400..499  -> when (statusCode.toInt()) {
-                401  -> UnauthorizedException(
-                    exceptionData().withBodyAsMessage()
-                )
-
-                404  -> NotFoundException(
-                    exceptionData()
-                )
-
-                415  -> UnsupportedMediaType(
-                    exceptionData().withBodyAsMessage()
-                )
-
-                else -> ClientErrorException(
-                    exceptionData().withBodyAsMessage()
-                )
-            }
-
-            in 500..599  -> when (statusCode.toInt()) {
-                503  -> ServiceUnavailableException(
-                    exceptionData().withBodyAsMessage()
-                )
-
-                else -> ServerErrorException(
-                    exceptionData().withBodyAsMessage()
-                )
-            }
-
-            !in 100..300 -> WeirdStatusCodeException(
-                exceptionData().withBodyAsMessage()
+        suspend fun exceptionData() =
+            HttpExceptionDataNoMessage(
+                uri = request.url,
+                status = connection.statusCode(),
+                headers = connection.headers(),
+                responseBody = connection.text(),
+                requestAttributes = connection.requestAttributes
             )
 
-            else         -> connection
-        }
+        val statusCodeObj = connection.statusCode()
+        val newResult =
+            when (val statusCode = statusCodeObj.value.toShort()) {
+                in 300..399  -> {
+                    RedirectionException(
+                        exceptionData().withBodyAsMessage()
+                    )
+                }
+
+                in 400..499  ->
+                    when (statusCode.toInt()) {
+                        401  ->
+                            UnauthorizedException(
+                                exceptionData().withBodyAsMessage()
+                            )
+
+                        404  ->
+                            NotFoundException(
+                                exceptionData()
+                            )
+
+                        415  ->
+                            UnsupportedMediaType(
+                                exceptionData().withBodyAsMessage()
+                            )
+
+                        else ->
+                            ClientErrorException(
+                                exceptionData().withBodyAsMessage()
+                            )
+                    }
+
+                in 500..599  ->
+                    when (statusCode.toInt()) {
+                        503  ->
+                            ServiceUnavailableException(
+                                exceptionData().withBodyAsMessage()
+                            )
+
+                        else ->
+                            ServerErrorException(
+                                exceptionData().withBodyAsMessage()
+                            )
+                    }
+
+                !in 100..300 ->
+                    WeirdStatusCodeException(
+                        exceptionData().withBodyAsMessage()
+                    )
+
+                else         -> connection
+            }
         return newResult
     }
-
-
 }

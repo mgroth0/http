@@ -1,0 +1,37 @@
+{
+  "type": "MultiPlatformModule",
+  "jvm": {},
+  "js": {
+    "type": "lib"
+  },
+  "android": {
+    "type": "Lib"
+  },
+  "dependencies": [
+    {
+      "type": "Project",
+      "cfg": "commonMainApi",
+      "path": ":k:http"
+    },
+    {
+      "type": "Project",
+      "cfg": "commonTestImplementation",
+      "path": ":k:test:co"
+    },
+    {
+      "type": "Project",
+      "cfg": "commonTestImplementation",
+      "path": ":k:test"
+    },
+    {
+      "type": "Lib",
+      "cfg": "commonTestImplementation",
+      "key": "kotlinx-coroutines-test"
+    },
+    {
+      "type": "Project",
+      "cfg": "androidInstrumentedTestImplementation",
+      "path": ":k:test:ainstrument"
+    }
+  ]
+}

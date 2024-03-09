@@ -1,13 +1,10 @@
 package matt.http.internet
 
+import matt.http.http
 import matt.http.url.MURL
-import matt.lang.not
+import matt.lang.common.not
 
 class TheInternet {
-//    val wasAvailableInThisRuntime by lazy {
-//        isAvailable()
-//    }
-//    val wasNotAvailableInThisRuntime get() = not(wasAvailableInThisRuntime)
 
 
     private var gotAReport = false
@@ -17,12 +14,15 @@ class TheInternet {
 
     val wasAlwaysAvailableInThisRuntime get() = !gotAReport
     val wasUnavilableThisRuntime get() = gotAReport
-
-
 }
 
-expect fun TheInternet.isAvailable(): Boolean
-fun TheInternet.isNotAvailable() = not(isAvailable())
+suspend fun TheInternet.isAvailable(): Boolean {
+    http("https://www.google.com").requireSuccessful()
+    /*now that I rewrote this in common, I have to rewrite the exception handlers to return false when appropriate!*/
+    return true
+}
+
+suspend fun TheInternet.isNotAvailable() = not(isAvailable())
 
 
 /*not https*/

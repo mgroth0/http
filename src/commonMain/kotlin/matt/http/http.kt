@@ -26,12 +26,12 @@ suspend fun http(
 
 suspend fun AnyResolvableFileOrUrl.http(
     requester: HTTPRequester = HTTPRequester.DEFAULT,
-    op: MutableHTTPRequest.() -> Unit = {},
+    op: MutableHTTPRequest.() -> Unit = {}
 ): HTTPConnection {
 
 
     val req = MutableHTTPRequest()
-    req.url = this.path
+    req.url = path
     req.op()
     val snap = req.snapshot()
     return requester.copy(request = snap).sendAndThrowUnlessConnectedCorrectly()

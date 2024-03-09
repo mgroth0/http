@@ -28,8 +28,10 @@ suspend inline fun <reified T : Any> HTTPConnectResult.requireIs(): T {
         val contentType =
             successfulConnection.contentType() ?: return successfulConnection.text().parse<T>()
         return when {
-            T::class == String::class && Text.Plain.withCharset(KTOR_COMMON_DEFAULT_CHARSET_THING)
-                .match(contentType) -> successfulConnection.text() as T
+            T::class == String::class &&
+                Text.Plain.withCharset(KTOR_COMMON_DEFAULT_CHARSET_THING)
+                    .match(contentType)
+            -> successfulConnection.text() as T
 
             T::class == ByteArray::class && Application.OctetStream.match(contentType) -> successfulConnection.bytes() as T
 
@@ -43,7 +45,6 @@ suspend inline fun <reified T : Any> HTTPConnectResult.requireIs(): T {
         )
         throw e
     }
-
 }
 
 

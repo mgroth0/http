@@ -5,8 +5,8 @@ import io.ktor.util.Attributes
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import matt.model.code.errreport.CommonThrowReport
-import matt.model.code.errreport.Report
+import matt.model.code.errreport.common.CommonThrowReport
+import matt.model.code.errreport.common.Report
 import matt.prim.str.elementsToString
 import matt.prim.str.mybuild.api.string
 import kotlin.collections.Map.Entry
@@ -26,15 +26,16 @@ class HTTPRequestReport(
     parameters: Map<String, List<String>>,
     uri: String,
     method: String,
-    headers: Map<String, List<String>>,
+    headers: Map<String, List<String>>
     /*payload: String? = null*/
 ) : Report() {
 
 
     companion object {
-        val json = Json {
-            prettyPrint = true
-        }
+        val json =
+            Json {
+                prettyPrint = true
+            }
     }
 
     override val text by lazy {
@@ -65,9 +66,10 @@ class HTTPResponseReport(
 
 
     companion object {
-        val json = Json {
-            prettyPrint = true
-        }
+        val json =
+            Json {
+                prettyPrint = true
+            }
     }
 
     override val text by lazy {

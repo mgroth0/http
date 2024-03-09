@@ -4,14 +4,14 @@ import kotlinx.coroutines.delay
 import matt.http.connection.HTTPConnectResult
 import matt.http.connection.HTTPConnectionProblem
 import matt.http.connection.SingleHTTPConnectResult
-import matt.http.lib.MyNewHTTPRequestBuilder
+import matt.http.lib.common.MyNewHTTPRequestBuilder
 import matt.http.req.ImmutableHTTPRequest
 import matt.http.req.requester.problems.HTTPRequestAttempt
 import matt.http.req.requester.problems.TooManyRetrysException
 import matt.http.req.requester.problems.TriedForTooLongException
 import matt.lang.assertions.require.requirePositive
 import matt.time.UnixTime
-import matt.time.dur.isNotZero
+import matt.time.dur.common.isNotZero
 import kotlin.time.Duration
 
 
@@ -52,9 +52,10 @@ data class RetryingHttpInterceptor(
         val problems = mutableListOf<Exception>()
         for (attemptNum in 0 until numAttempts) {
             val tSent = UnixTime() - startedTrying
-            val attempt = InnerHttpEngine(timeout = timeout).sendNewRequest(
-                request = request, timeout = timeout
-            )
+            val attempt =
+                InnerHttpEngine(timeout = timeout).sendNewRequest(
+                    request = request, timeout = timeout
+                )
             val tGotResult = UnixTime() - startedTrying
             attempts += HTTPRequestAttempt(tSent = tSent, tGotResult = tGotResult, result = attempt)
             when (val r = onResult(attempt)) {
@@ -67,7 +68,6 @@ data class RetryingHttpInterceptor(
                 }
 
                 else                     -> return r
-
             }
             if (attemptNum < (numAttempts - 1) && interAttemptWait.isNotZero) {
                 delay(interAttemptWait)
@@ -94,5 +94,4 @@ class InnerHttpEngine(val timeout: Duration) {
         reqBuilder.applyTimeout(timeout)
         return reqBuilder.send()
     }
-
 }

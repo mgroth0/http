@@ -3,9 +3,11 @@ package matt.http.url.query
 import io.ktor.http.URLProtocol
 import matt.collect.map.filterOutNullValues
 import matt.http.url.MURL
+import matt.lang.common.inList
+import matt.lang.common.substringAfterSingular
+import matt.lang.common.substringBeforeSingular
 import matt.lang.delegation.provider
 import matt.lang.delegation.varProp
-import matt.lang.inList
 import matt.model.op.convert.BooleanStringConverter
 import matt.model.op.convert.DefiniteIntStringConverter
 import matt.model.op.convert.EnumNameStringConverter
@@ -21,6 +23,18 @@ import matt.prim.str.elementsToString
 import matt.prim.str.mybuild.api.string
 import kotlin.enums.enumEntries
 import kotlin.jvm.JvmName
+
+fun MURL.getQueryParams(): Map<String, String> {
+    if ("?" !in path) return emptyMap()
+    val paramsPart = path.substringAfterSingular('?')
+    if (paramsPart.isEmpty()) return emptyMap()
+    check(paramsPart.isNotBlank())
+    val params = paramsPart.split('&')
+    return params.associate {
+        it.substringBeforeSingular('=') to it.substringAfterSingular('=')
+    }
+}
+
 
 @JvmName("query1")
 infix fun MURL.query(params: QueryParams): MURL = query(params.toMap())
@@ -55,25 +69,26 @@ fun buildQueryURL(
     params: Map<String, List<String>>
 ): MURL {
 
-    val rawString = string {
-        append(mainURL)
-        if (params.isNotEmpty()) {
-            if ("?" !in mainURL) {
-                append("?")
-            } else {
-                append("&")
+    val rawString =
+        string {
+            append(mainURL)
+            if (params.isNotEmpty()) {
+                if ("?" !in mainURL) {
+                    append("?")
+                } else {
+                    append("&")
+                }
+                append(
+                    params.entries.flatMap { (k, v) -> v.map { "$k=$it" } }.joinToString(separator = "&")
+                )
             }
-            append(
-                params.entries.flatMap { (k, v) -> v.map { "$k=$it" } }.joinToString(separator = "&")
-            )
         }
-    }
 
     return MURL(rawString)
 }
 
 
-fun MURL.withFragment(fragment: String) = buildFragmentURL(path,fragment)
+fun MURL.withFragment(fragment: String) = buildFragmentURL(path, fragment)
 
 fun buildFragmentURL(
     mainURL: String,
@@ -89,17 +104,18 @@ fun MURL.withPort(port: Int): MURL {
     if (":" in path) {
         error("not ready if already has port")
     }
-    return MURL(path.substringBefore("/") + ":" + port.toString() + "/" + path.substringAfter("/"))
+    return MURL(path.substringBeforeSingular("/") + ":" + port.toString() + "/" + path.substringAfterSingular("/"))
 }
 
 
 private const val PROTOCOL_DELIMITER = "://"
 
-fun MURL.withProtocol(protocol: URLProtocol): MURL = if (PROTOCOL_DELIMITER in path) {
-    MURL(protocol.name + PROTOCOL_DELIMITER + path.substringAfter(PROTOCOL_DELIMITER))
-} else {
-    MURL(protocol.name + PROTOCOL_DELIMITER + path)
-}
+fun MURL.withProtocol(protocol: URLProtocol): MURL =
+    if (PROTOCOL_DELIMITER in path) {
+        MURL(protocol.name + PROTOCOL_DELIMITER + path.substringAfterSingular(PROTOCOL_DELIMITER))
+    } else {
+        MURL(protocol.name + PROTOCOL_DELIMITER + path)
+    }
 
 
 abstract class QueryParams : Query {
@@ -122,11 +138,12 @@ abstract class QueryParams : Query {
 
 
     fun stringListParam() = param(StringListStringListConverter)
-    fun <T : Any> param(converter: StringListConverter<T>) = provider {
-        val p = Param(it, converter = converter)
-        params += p
-        varProp(getter = { p.convertedValue }, setter = { p.setFrom(it) })
-    }
+    fun <T : Any> param(converter: StringListConverter<T>) =
+        provider {
+            val p = Param(it, converter = converter)
+            params += p
+            varProp(getter = { p.convertedValue }, setter = { p.setFrom(it) })
+        }
 
     fun stringParam() = singleParam(StringStringConverter)
 
@@ -146,7 +163,5 @@ abstract class QueryParams : Query {
     final override fun urlStringRep(): String = buildQueryURL("", toMap()).path
 
     final override fun toString(): String = urlStringRep()
-
-
 }
 

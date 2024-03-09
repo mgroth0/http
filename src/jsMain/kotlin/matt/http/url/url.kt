@@ -1,9 +1,11 @@
 package matt.http.url
 
 import matt.http.http
+import matt.http.url.common.CommonUrl
+import matt.http.url.common.UrlResolver
 import org.w3c.dom.url.URL
 
-external fun decodeURIComponent(encodedURI: String): String
+private external fun decodeURIComponent(encodedURI: String): String
 
 actual class MURL actual constructor(actual override val path: String) : CommonUrl<MURL>, UrlResolver<MURL> {
 
@@ -11,9 +13,10 @@ actual class MURL actual constructor(actual override val path: String) : CommonU
 
     actual val protocol: String get() = jsURL.protocol
 
-    actual override fun resolve(other: String) = MURL(
-        path.removeSuffix(CommonUrl.URL_SEP) + CommonUrl.URL_SEP + other.removePrefix(CommonUrl.URL_SEP)
-    )
+    actual override fun resolve(other: String) =
+        MURL(
+            path.removeSuffix(CommonUrl.URL_SEP) + CommonUrl.URL_SEP + other.removePrefix(CommonUrl.URL_SEP)
+        )
 
     actual override fun toString() = path
 

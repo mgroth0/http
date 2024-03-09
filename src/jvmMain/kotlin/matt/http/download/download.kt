@@ -1,6 +1,6 @@
 package matt.http.download
 
-import matt.lang.err
+import matt.lang.common.err
 import matt.lang.file.toJFile
 import matt.lang.model.file.AnyFsFile
 import java.io.FileOutputStream

@@ -46,9 +46,10 @@ abstract class HTTPConnectionProblemWithMultipleRequests(
     uri: String,
     message: String,
     final override val requestAttributes: List<Attributes>,
-    cause: Throwable? = null,
+    cause: Throwable? = null
 ) : IOException("$uri: $message", cause),
-    HTTPConnectResult, MultipleHTTPConnectResult
+    HTTPConnectResult,
+    MultipleHTTPConnectResult
 
 abstract class HTTPConnectionProblemNoResponse(
     uri: String,
@@ -66,19 +67,25 @@ abstract class HTTPConnectionProblemWithResponse(
     status: HttpStatusCode,
     headers: Headers,
     responseBody: String
-) : HTTPConnectionProblem(uri = uri, message = lineDelimitedString {
-        +"message: $message"
-        +HTTPResponseReport(
-            status = status,
-            headers = headers.entries().toList(),
-            body = responseBody
-        ).text
-
-    }, cause = cause), SingleHTTPConnectResult
+) : HTTPConnectionProblem(
+        uri = uri,
+        message =
+            lineDelimitedString {
+                +"message: $message"
+                +HTTPResponseReport(
+                    status = status,
+                    headers = headers.entries().toList(),
+                    body = responseBody
+                ).text
+            },
+        cause = cause
+    ),
+    SingleHTTPConnectResult
 
 class HTTPConnection(
     override val requestAttributes: Attributes,
-    private val response: HttpResponse
+    @PublishedApi
+    internal val response: HttpResponse
 ) : SingleHTTPConnectResult {
 
 
@@ -154,14 +161,13 @@ class HTTPConnection(
 
     suspend fun bodyAsChannel() = response.bodyAsChannel()
 
-    suspend fun consumeLines(op: (String) -> Unit) {
+    suspend inline fun consumeLines(op: (String) -> Unit) {
         val channel = response.bodyAsChannel()
         do {
             val nextLine = channel.readUTF8Line()
             if (nextLine != null) op(nextLine)
         } while (nextLine != null)
     }
-
 }
 
 

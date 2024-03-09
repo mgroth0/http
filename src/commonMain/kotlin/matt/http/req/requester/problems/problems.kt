@@ -7,7 +7,7 @@ import matt.http.connection.HTTPConnectionProblemNoResponse
 import matt.http.connection.HTTPConnectionProblemWithMultipleRequests
 import matt.http.connection.HTTPConnectionProblemWithResponse
 import matt.http.connection.SingleHTTPConnectResult
-import matt.model.code.errreport.infoString
+import matt.model.code.errreport.common.infoString
 import matt.prim.str.english.maybePlural
 import matt.prim.str.joinWithNewLines
 import kotlin.time.Duration
@@ -23,13 +23,20 @@ sealed class TooMuchRetryingException(
     uri: String,
     attempts: List<HTTPRequestAttempt>,
     problems: List<Exception>
-) : HTTPConnectionProblemWithMultipleRequests(uri = uri,
+) : HTTPConnectionProblemWithMultipleRequests(
+        uri = uri,
         "No successful connection after ${attempts.size} ${
             maybePlural(
                 attempts.size, "attempt"
             )
-        }\n${attempts.joinWithNewLines { "\t${it.tSent}-${it.tGotResult}\t${it.result}" }}\n\n\n" + problems.joinWithNewLines { it.infoString() },
-        requestAttributes = attempts.map { it.result.requestAttributes })
+        }\n${attempts.joinWithNewLines {
+            "\t${it.tSent}-${it.tGotResult}\t${it.result}"
+        }}\n\n\n" +
+            problems.joinWithNewLines {
+                it.infoString()
+            },
+        requestAttributes = attempts.map { it.result.requestAttributes }
+    )
 
 class TooManyRetrysException(
     uri: String,
@@ -59,7 +66,7 @@ sealed class NoConnectionException(
 class HTTPExceptionWhileCreatingConnection(
     uri: String,
     cause: Exception,
-    requestAttributes: Attributes,
+    requestAttributes: Attributes
 ) : NoConnectionException(
         uri = uri,
         "Exception while creating connection: $cause: ${cause.message}",
@@ -70,7 +77,7 @@ class HTTPExceptionWhileCreatingConnection(
 class HTTPTimeoutException(
     uri: String,
     duration: Duration,
-    requestAttributes: Attributes,
+    requestAttributes: Attributes
 ) : NoConnectionException(uri = uri, "Timeout after $duration", requestAttributes = requestAttributes)
 
 sealed class HTTPBadConnectionException(
@@ -105,14 +112,15 @@ data class HttpExceptionDataNoMessage(
     val responseBody: String,
     val requestAttributes: Attributes
 ) {
-    fun withMessage(m: String) = HttpExceptionData(
-        uri = uri,
-        status = status,
-        message = m,
-        headers = headers,
-        responseBody = responseBody,
-        requestAttributes = requestAttributes
-    )
+    fun withMessage(m: String) =
+        HttpExceptionData(
+            uri = uri,
+            status = status,
+            message = m,
+            headers = headers,
+            responseBody = responseBody,
+            requestAttributes = requestAttributes
+        )
 
     fun withBodyAsMessage() = withMessage(responseBody)
 }

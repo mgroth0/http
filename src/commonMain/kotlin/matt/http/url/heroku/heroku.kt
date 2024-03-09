@@ -13,7 +13,7 @@ value class HerokuHost(val url: String)
 class AnApiForMyHerokuApp(
     url: HerokuHost,
     auths: Map<String, AuthHeader> = mapOf()
-) : AuthenticatedApi(auths=auths) {
+) : AuthenticatedApi(auths = auths) {
     override val urlPrefix = MURL(url.url)/*herokuAbsoluteHostName(absoluteAppName)*/
 
     override fun toString(): String = "API for Heroku App: $urlPrefix"

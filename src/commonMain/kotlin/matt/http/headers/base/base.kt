@@ -1,87 +1,58 @@
 package matt.http.headers.base
 
 import matt.http.HTTPDslMarker
+import matt.http.headers.key.HttpHeaderName
 import matt.http.req.MutableHeaders
 import matt.http.req.valueForHeader
 import matt.lang.delegation.provider
 import matt.lang.delegation.varProp
-import matt.model.op.convert.StringStringConverter
-import matt.prim.converters.StringConverter
 
 
 @HTTPDslMarker
 abstract class HTTPHeadersBase internal constructor(
-    private val con: MutableHeaders
+    @PublishedApi
+    internal val con: MutableHeaders
 ) {
 
-    protected fun <T> addHeader(
-        key: String,
-        value: T,
-        converter: StringConverter<T>
+    fun <T: Any> setHeader(
+        key: HttpHeaderName<T>,
+        value: T
     ) {
-        val oldValueConverted = validateHeaderIsAbsentOrHasValue(key, value, converter)
-        if (oldValueConverted != value) {
-            con.addHeader(key, converter.toString(value))
-        }
+        con.setHeader(key, value)
     }
-
-    @Suppress("UNUSED_PARAMETER")
-    operator fun set(
-        s: String,
-        value: String
+    inline fun <reified T: Any> addHeaderNoDuplicates(
+        key: HttpHeaderName<T>,
+        value: T
     ) {
-        error("unclear how to set or if I should set now that I understand that its not a map")
+        if (con.valueForHeader(key) != value) {
+            con.addHeader(key, value)
+        }
+    }
+
+    operator fun <T: Any> set(
+        key: HttpHeaderName<T>,
+        value: T
+    ) {
+        setHeader(key, value)
     }
 
 
-    private fun <T> validateHeaderIsAbsentOrHasValue(
-        header: String,
-        value: T,
-        converter: StringConverter<T>
-    ): T? {
-        val oldValue = con.valueForHeader(header)
-        val oldValueConverted = oldValue?.let { converter.fromString(it) }
-        require(oldValue == null || oldValueConverted == value) {
-            "unclear if I am adding or setting here (oldValue=$oldValue,newValue=$value)"
-        }
-        return oldValueConverted
+    fun removeAllHeaders(key: HttpHeaderName<*>) {
+        con.removeAllHeaders(key)
     }
 
 
-    private fun addHeader(
-        key: String,
-        value: String
-    ) = addHeader(key, value, StringStringConverter)
-
-    /*only commenting this out because it is unused and I'm dealing with JDK 1.8 inline issues*/
-    /*private fun propProvider(key: String) = provider {
-      varProp(
-        getter = { con.valueForHeader(key) },
-        setter = {
-          require(it != null) {
-            "not sure how to handle this yet"
-          }
-          addHeader(key, it)
-        }
-      )
-    }*/
-
-    protected fun <T> propProvider(
-        key: String,
-        converter: StringConverter<T & Any>
-    ) = provider {
-        varProp(
-            getter = {
-                val s = con.valueForHeader(key)
-                s?.let { converter.fromString(s) }
-            },
-            setter = {
-                requireNotNull(it) {
-                    "not sure how to handle this yet"
+    internal inline fun <reified T: Any> propProvider(key: HttpHeaderName<T>) =
+        provider {
+            varProp(
+                getter = { con.valueForHeader(key) },
+                setter = {
+                    if (it == null) {
+                        removeAllHeaders(key)
+                    } else {
+                        setHeader(key, it)
+                    }
                 }
-                addHeader(key, it, converter)
-            }
-        )
-    }
-
+            )
+        }
 }

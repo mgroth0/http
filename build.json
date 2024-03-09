@@ -40,6 +40,11 @@
     },
     {
       "type": "Lib",
+      "cfg": "commonMainApi",
+      "key": "kotlinx-coroutines"
+    },
+    {
+      "type": "Lib",
       "cfg": "jvmMainApi",
       "key": "ktorClientJava"
     },
@@ -69,9 +74,9 @@
       "key": "kotlinx-coroutines-test"
     },
     {
-      "type": "Lib",
+      "type": "Project",
       "cfg": "androidInstrumentedTestImplementation",
-      "key": "androidx-test-runner"
+      "path": ":k:test:ainstrument"
     }
   ]
 }

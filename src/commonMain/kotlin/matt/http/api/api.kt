@@ -25,8 +25,6 @@ interface API {
         url: String,
         op: MutableHTTPRequest.() -> Unit = {}
     ): HTTPConnection
-
-
 }
 
 abstract class APIWithConfiguredHeaders : API {
@@ -78,7 +76,6 @@ abstract class ConfiguredApi : APIWithConfiguredHeaders() {
             def?.invoke(this)
             subHeaders?.invoke(this)
         }
-
 }
 
 abstract class SubApi(val path: String) : APIWithConfiguredHeaders() {
@@ -98,5 +95,14 @@ abstract class SubApi(val path: String) : APIWithConfiguredHeaders() {
             def?.invoke(this)
             subHeaders?.invoke(this)
         }
-
 }
+
+
+abstract class ThisHostBase : API {
+    final override suspend fun http(
+        url: String,
+        op: MutableHTTPRequest.() -> Unit
+    ): HTTPConnection = MURL(url).http(op = op)
+}
+
+object ThisHost : ThisHostBase()

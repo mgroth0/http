@@ -25,13 +25,14 @@ data class HTTPRequester(
 
 
     suspend fun sendAndThrowUnlessConnectedCorrectly(): HTTPConnection {
-        val result = retryer.intercept(
-            request = request,
-            timeout = timeout,
-            onResult = {
-                mainInterceptor.intercept(request, it)
-            }
-        )
+        val result =
+            retryer.intercept(
+                request = request,
+                timeout = timeout,
+                onResult = {
+                    mainInterceptor.intercept(request, it)
+                }
+            )
         when (result) {
             is HTTPConnectionProblem -> throw result
             else                     -> Unit
@@ -40,8 +41,6 @@ data class HTTPRequester(
     }
 
     private val mainInterceptor = StatusCodeChecker(suppressAnyErrorReport = suppressAnyErrorReport)
-
-
 }
 
 
