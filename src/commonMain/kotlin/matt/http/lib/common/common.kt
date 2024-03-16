@@ -10,6 +10,7 @@ import io.ktor.client.utils.EmptyContent
 import io.ktor.http.HttpMethod
 import io.ktor.http.content.ByteArrayContent
 import io.ktor.http.content.OutgoingContent
+import io.ktor.utils.io.CancellationException
 import io.ktor.utils.io.InternalAPI
 import matt.http.connection.HTTPConnection
 import matt.http.connection.SingleHTTPConnectResult
@@ -94,6 +95,8 @@ class MyNewHTTPRequestBuilder : MyHttpRequestBuilderInter() {
             val con = client.request(builder)
             HTTPConnection(builder.attributes, con)
         } catch (e: Exception) {
+            /*Otherwise Coroutines in the middle of an HTTP request won't cancel normally!*/
+            if (e is CancellationException) throw e
             HTTPExceptionWhileCreatingConnection(
                 uri = builder.url.toString(),
                 cause = e,
