@@ -1,6 +1,7 @@
 package matt.http.headers.content
 
 import matt.lang.charset.DEFAULT_CHARSET_NAME_CAP
+import matt.lang.mime.MimeTypes.PLAIN_TEXT
 import matt.prim.converters.StringConverter
 
 
@@ -10,7 +11,7 @@ enum class HTTPMediaType(val string: String? = null) {
     applicationVndHerokuJson("application/vnd.heroku+json; version=3"),
     applicationVndHerokuJsonAccountQuotas("application/vnd.heroku+json; version=3.account-quotas"),
     applicationVndGitHubJson("application/vnd.github+json"),
-    textPlain("text/plain");
+    textPlain(PLAIN_TEXT.identifier);
 
     fun asString() = string ?: name
 }

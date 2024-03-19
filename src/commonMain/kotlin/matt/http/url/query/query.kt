@@ -152,6 +152,7 @@ abstract class QueryParams : Query {
     fun intParam() = singleParam(DefiniteIntStringConverter)
 
 
+    @OptIn(ExperimentalStdlibApi::class)
     inline fun <reified E : Enum<E>> enumParam() = singleParam(EnumNameStringConverter(enumEntries<E>()))
 
     fun <T : Any> singleParam(converter: StringConverter<T>) =
